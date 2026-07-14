@@ -1,0 +1,25 @@
+{
+  "liveEnergyUsageKw": 1420,
+  "peakEnergyUsageKw": 2200,
+  "solarContributionPercent": 34.5,
+  "waterConsumptionLiters": 128000,
+  "reclaimedWaterPercent": 42.0,
+  "carbonEmissionKg": 4120,
+  "carbonOffsetsKg": 1450,
+  "wasteGeneratedTons": 4.2,
+  "recyclingRatePercent": 68.4,
+  "transportModes": {
+    "metro": 62,
+    "busShuttle": 20,
+    "rideshare": 10,
+    "personalCar": 8
+  },
+  "historicalEnergy": [
+    { "time": "15:00", "gridKw": 800, "solarKw": 400 },
+    { "time": "16:00", "gridKw": 850, "solarKw": 420 },
+    { "time": "17:00", "gridKw": 900, "solarKw": 450 },
+    { "time": "18:00", "gridKw": 950, "solarKw": 410 },
+    { "time": "19:00", "gridKw": 1100, "solarKw": 380 },
+    { "time": "20:00", "gridKw": 1000, "solarKw": 350 }
+  ]
+}

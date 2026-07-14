@@ -1,0 +1,44 @@
+[
+  {
+    "id": "m1",
+    "matchNumber": 49,
+    "homeTeam": "Argentina",
+    "awayTeam": "France",
+    "homeScore": 2,
+    "awayScore": 1,
+    "status": "LIVE",
+    "minute": 74,
+    "stadium": "Lusail Stadium",
+    "attendance": 78912,
+    "group": "Group A",
+    "dateTime": "2026-07-14T19:00:00Z"
+  },
+  {
+    "id": "m2",
+    "matchNumber": 50,
+    "homeTeam": "USA",
+    "awayTeam": "Mexico",
+    "homeScore": 0,
+    "awayScore": 0,
+    "status": "SCHEDULED",
+    "minute": 0,
+    "stadium": "MetLife Stadium",
+    "attendance": 0,
+    "group": "Group B",
+    "dateTime": "2026-07-15T21:00:00Z"
+  },
+  {
+    "id": "m3",
+    "matchNumber": 51,
+    "homeTeam": "Brazil",
+    "awayTeam": "Spain",
+    "homeScore": 3,
+    "awayScore": 2,
+    "status": "FINISHED",
+    "minute": 90,
+    "stadium": "SoFi Stadium",
+    "attendance": 71500,
+    "group": "Group C",
+    "dateTime": "2026-07-13T18:00:00Z"
+  }
+]

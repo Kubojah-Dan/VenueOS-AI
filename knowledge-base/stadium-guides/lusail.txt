@@ -1,0 +1,22 @@
+LUSAIL STADIUM OPERATIONAL GUIDE
+===============================
+Stadium capacity: 80,000.
+Gates and Entrances:
+- Gate A (North): Primary entrance for general admission. Connects directly to the Lusail Metro Station Shuttle Bus lines.
+- Gate B (East): Dedicated entrance for VIP, hospitality ticket holders, and official FIFA delegates. Has direct access to Parking Lot Alpha.
+- Gate C (South): General admission. Closest entrance to the central Taxi/Rideshare drops.
+- Gate D (West): Media, Broadcast crews, and wheelchair-accessible entry. Connects to accessible lift routes for level 1 and level 2 seating.
+
+Emergency Protocols:
+- Primary Assembly Point: Sector North (Green Lawn, outside Gate A).
+- Secondary Assembly Point: Sector West (Parking Beta, outside Gate D).
+- Evacuation pathways: Sector A exits through Gate A. Sector B exits through Gate B. Sector C exits through Gate C. Sector D exits through Gate D.
+
+Accessibility:
+- Wheelchair ramps are fully operational at Gate D.
+- Audio guide loops are configured for Level 1, blocks 101 to 110.
+- Lifts are located at elevator banks E1 and E2 near Sector West.
+
+Sustainability:
+- Lusail stadium targets zero-waste-to-landfill. High-grade food composters are located at food courts FC-1 and FC-2.
+- Smart LED lighting schedules are automatically regulated by the operations dashboard.

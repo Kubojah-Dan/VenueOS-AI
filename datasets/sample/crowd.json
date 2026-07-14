@@ -1,0 +1,26 @@
+{
+  "totalOccupancy": 78912,
+  "maxCapacity": 80000,
+  "occupancyPercentage": 98.6,
+  "crowdFlowRatePpm": 420,
+  "sectors": [
+    { "name": "Sector North", "occupancy": 19800, "capacity": 20000, "status": "NORMAL" },
+    { "name": "Sector East", "occupancy": 19950, "capacity": 20000, "status": "CONGESTED" },
+    { "name": "Sector South", "occupancy": 19500, "capacity": 20000, "status": "NORMAL" },
+    { "name": "Sector West", "occupancy": 19662, "capacity": 20000, "status": "NORMAL" }
+  ],
+  "gates": [
+    { "name": "Gate A (North)", "queueTimeMin": 12, "flowRatePpm": 90, "status": "SLOW" },
+    { "name": "Gate B (East)", "queueTimeMin": 28, "flowRatePpm": 50, "status": "CRITICAL" },
+    { "name": "Gate C (South)", "queueTimeMin": 8, "flowRatePpm": 110, "status": "NORMAL" },
+    { "name": "Gate D (West)", "queueTimeMin": 5, "flowRatePpm": 80, "status": "NORMAL" }
+  ],
+  "predictedOccupancy": [
+    { "time": "19:00", "actual": 68000, "predicted": 68000 },
+    { "time": "19:30", "actual": 75000, "predicted": 74500 },
+    { "time": "20:00", "actual": 78912, "predicted": 78500 },
+    { "time": "20:30", "actual": null, "predicted": 79500 },
+    { "time": "21:00", "actual": null, "predicted": 80000 },
+    { "time": "21:30", "actual": null, "predicted": 75000 }
+  ]
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "inc-001",
+    "category": "Medical",
+    "severity": "MEDIUM",
+    "description": "Fan experiencing heat exhaustion at Section 102, Row E.",
+    "location": "Section 102",
+    "status": "IN_PROGRESS",
+    "reportedAt": "2026-07-14T18:45:00Z",
+    "assignedTeam": "Medical Response Team B",
+    "actions": "First aid responders arrived. Rehydration salts and cooling pads administered.",
+    "coordinates": { "x": 48.23, "y": 16.37 }
+  },
+  {
+    "id": "inc-002",
+    "category": "Crowd",
+    "severity": "HIGH",
+    "description": "Congestion buildup at Gate A entrance due to scanner failure.",
+    "location": "Gate A (North)",
+    "status": "CRITICAL",
+    "reportedAt": "2026-07-14T19:02:00Z",
+    "assignedTeam": "Gate Operations & Security",
+    "actions": "Re-routing queues to Gate A-2 auxiliary turnstiles. Initiating manual scanner override.",
+    "coordinates": { "x": 48.24, "y": 16.38 }
+  },
+  {
+    "id": "inc-003",
+    "category": "Facilities",
+    "severity": "LOW",
+    "description": "Spill reported in Food Court concourse near Stall 4.",
+    "location": "Food Court Concourse",
+    "status": "RESOLVED",
+    "reportedAt": "2026-07-14T17:30:00Z",
+    "assignedTeam": "Sanitation Dispatch 1",
+    "actions": "Spill cleaned and warning cones placed. Cones removed after drying.",
+    "coordinates": { "x": 48.22, "y": 16.36 }
+  }
+]

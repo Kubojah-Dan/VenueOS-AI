@@ -1505,10 +1505,10 @@
     }
   ],
   "sustainability": {
-    "liveEnergyUsageKw": 1429,
+    "liveEnergyUsageKw": 1628,
     "peakEnergyUsageKw": 2200,
-    "solarContributionPercent": 59.5,
-    "waterConsumptionLiters": 139912,
+    "solarContributionPercent": 76.5,
+    "waterConsumptionLiters": 145562,
     "reclaimedWaterPercent": 42,
     "carbonEmissionKg": 4120,
     "carbonOffsetsKg": 1450,
@@ -1554,32 +1554,32 @@
     ]
   },
   "crowd": {
-    "totalOccupancy": 79132,
+    "totalOccupancy": 78972,
     "maxCapacity": 80000,
-    "occupancyPercentage": 98.9,
-    "crowdFlowRatePpm": 323,
+    "occupancyPercentage": 98.7,
+    "crowdFlowRatePpm": 173,
     "sectors": [
       {
         "name": "Sector North",
-        "occupancy": 19231,
+        "occupancy": 19217,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector East",
-        "occupancy": 19315,
+        "occupancy": 19080,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector South",
-        "occupancy": 19470,
+        "occupancy": 19375,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector West",
-        "occupancy": 18980,
+        "occupancy": 18933,
         "capacity": 20000,
         "status": "CRITICAL"
       }
@@ -1587,9 +1587,9 @@
     "gates": [
       {
         "name": "Gate A (North)",
-        "queueTimeMin": 18,
+        "queueTimeMin": 40,
         "flowRatePpm": 90,
-        "status": "SLOW"
+        "status": "CRITICAL"
       },
       {
         "name": "Gate B (East)",
@@ -1599,15 +1599,15 @@
       },
       {
         "name": "Gate C (South)",
-        "queueTimeMin": 37,
+        "queueTimeMin": 50,
         "flowRatePpm": 110,
         "status": "CRITICAL"
       },
       {
         "name": "Gate D (West)",
-        "queueTimeMin": 18,
+        "queueTimeMin": 8,
         "flowRatePpm": 80,
-        "status": "SLOW"
+        "status": "NORMAL"
       }
     ],
     "predictedOccupancy": [

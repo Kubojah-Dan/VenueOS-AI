@@ -117,7 +117,9 @@ const translations: Record<string, Record<string, string>> = {
     closedArchives: 'Closed Archives',
     staffRoster: 'Active Staff Roster',
     decisionSupport: 'Active Decision Support',
-    suggestedMitigation: 'Suggested Mitigation Workflows'
+    suggestedMitigation: 'Suggested Mitigation Workflows',
+    subTitle: 'Operations Command',
+    weatherText: 'Live Weather'
   },
   es: {
     // Navigation Sidebar
@@ -162,7 +164,9 @@ const translations: Record<string, Record<string, string>> = {
     closedArchives: 'Archivos Cerrados',
     staffRoster: 'Lista de Personal Activa',
     decisionSupport: 'Soporte de Decisión Activo',
-    suggestedMitigation: 'Flujos de Mitigación Sugeridos'
+    suggestedMitigation: 'Flujos de Mitigación Sugeridos',
+    subTitle: 'Comando de Operaciones',
+    weatherText: 'Clima en Vivo'
   },
   ar: {
     // Navigation Sidebar
@@ -207,7 +211,9 @@ const translations: Record<string, Record<string, string>> = {
     closedArchives: 'الأرشيف المغلق',
     staffRoster: 'قائمة الموظفين النشطين',
     decisionSupport: 'دعم القرار النشط',
-    suggestedMitigation: 'سير عمل التخفيف المقترح'
+    suggestedMitigation: 'سير عمل التخفيف المقترح',
+    subTitle: 'قيادة العمليات',
+    weatherText: 'الطقس المباشر'
   },
   fr: {
     // Navigation Sidebar
@@ -252,7 +258,9 @@ const translations: Record<string, Record<string, string>> = {
     closedArchives: 'Archives Clôturées',
     staffRoster: 'Liste du Personnel Actif',
     decisionSupport: 'Aide à la Décision Active',
-    suggestedMitigation: 'Flux de Mitigation Suggérés'
+    suggestedMitigation: 'Flux de Mitigation Suggérés',
+    subTitle: 'Commandement des Opérations',
+    weatherText: 'Météo en Direct'
   }
 };
 

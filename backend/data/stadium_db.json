@@ -1505,10 +1505,10 @@
     }
   ],
   "sustainability": {
-    "liveEnergyUsageKw": 1361,
+    "liveEnergyUsageKw": 1081,
     "peakEnergyUsageKw": 2200,
-    "solarContributionPercent": 58.5,
-    "waterConsumptionLiters": 146881,
+    "solarContributionPercent": 60.5,
+    "waterConsumptionLiters": 148514,
     "reclaimedWaterPercent": 42,
     "carbonEmissionKg": 4120,
     "carbonOffsetsKg": 1450,
@@ -1554,32 +1554,32 @@
     ]
   },
   "crowd": {
-    "totalOccupancy": 78987,
+    "totalOccupancy": 79166,
     "maxCapacity": 80000,
-    "occupancyPercentage": 98.7,
-    "crowdFlowRatePpm": 275,
+    "occupancyPercentage": 99,
+    "crowdFlowRatePpm": 357,
     "sectors": [
       {
         "name": "Sector North",
-        "occupancy": 19259,
+        "occupancy": 19028,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector East",
-        "occupancy": 19450,
+        "occupancy": 19343,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector South",
-        "occupancy": 19421,
+        "occupancy": 19515,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector West",
-        "occupancy": 19025,
+        "occupancy": 19211,
         "capacity": 20000,
         "status": "CRITICAL"
       }
@@ -1587,27 +1587,27 @@
     "gates": [
       {
         "name": "Gate A (North)",
-        "queueTimeMin": 35,
+        "queueTimeMin": 39,
         "flowRatePpm": 90,
         "status": "CRITICAL"
       },
       {
         "name": "Gate B (East)",
-        "queueTimeMin": 56,
+        "queueTimeMin": 57,
         "flowRatePpm": 50,
         "status": "CRITICAL"
       },
       {
         "name": "Gate C (South)",
-        "queueTimeMin": 51,
+        "queueTimeMin": 34,
         "flowRatePpm": 110,
         "status": "CRITICAL"
       },
       {
         "name": "Gate D (West)",
-        "queueTimeMin": 11,
+        "queueTimeMin": 32,
         "flowRatePpm": 80,
-        "status": "NORMAL"
+        "status": "CRITICAL"
       }
     ],
     "predictedOccupancy": [

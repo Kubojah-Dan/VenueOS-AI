@@ -27,7 +27,7 @@ import {
 import { Link } from 'react-router-dom';
 
 export const DashboardOverview: React.FC = () => {
-  const { role, matches, crowd, sustainability, incidents, uploadHistory, weather } = useApp();
+  const { role, matches, crowd, sustainability, incidents, uploadHistory, weather, t, isConnected } = useApp();
 
   const activeIncidents = incidents.filter(i => i.status !== 'RESOLVED');
   
@@ -52,17 +52,32 @@ export const DashboardOverview: React.FC = () => {
     ? 'WARNING'
     : 'NOMINAL';
 
+  const getStadiumLocation = (stadiumName: string) => {
+    const s = String(stadiumName || '').toLowerCase();
+    if (s.includes('mercedes') || s.includes('atlanta')) return 'Atlanta, Georgia, USA';
+    if (s.includes('metlife')) return 'East Rutherford, NJ, USA';
+    if (s.includes('sofi')) return 'Los Angeles, CA, USA';
+    if (s.includes('azteca')) return 'Mexico City, Mexico';
+    if (s.includes('bc place')) return 'Vancouver, BC, Canada';
+    if (s.includes('bayt')) return 'Al Khor, QA';
+    if (s.includes('janoub')) return 'Al Wakrah, QA';
+    if (s.includes('khalifa') || s.includes('ali') || s.includes('education')) return 'Al Rayyan, QA';
+    if (s.includes('lusail')) return 'Doha, QA';
+    return 'Doha, QA'; // fallback default
+  };
+
   // Custom tooltips with premium glassmorphism styling
   const CustomAreaTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white/80 dark:bg-graphite-900/80 backdrop-blur-md border border-gray-250/20 dark:border-graphite-800 p-3.5 rounded-xl shadow-premium text-xs text-left space-y-1">
           <p className="font-bold text-gray-500 uppercase tracking-wider text-[9px]">{payload[0].payload.time} Telemetry</p>
-          {payload.map((p: any, idx: number) => (
-            <p key={idx} style={{ color: p.color }} className="font-semibold text-[11px]">
-              {p.name}: <span className="font-bold">{p.value.toLocaleString()} kW</span>
-            </p>
-          ))}
+          <p className="text-forest-600 dark:text-emerald-500 font-extrabold">
+            Solar: {payload[0].value} kW
+          </p>
+          <p className="text-gray-700 dark:text-gray-300 font-bold">
+            Grid: {payload[1].value} kW
+          </p>
         </div>
       );
     }
@@ -90,24 +105,26 @@ export const DashboardOverview: React.FC = () => {
     <div className="space-y-6 font-sans">
       
       {/* HEADER SECTION WITH WEATHER & STATUS */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-graphite-900 p-4 rounded-xl border border-gray-150 dark:border-graphite-800 shadow-premium gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md p-4 rounded-xl border border-gray-150 dark:border-graphite-800 shadow-premium gap-4 relative z-10">
         <div>
-          <h1 className="text-base font-bold text-gray-800 dark:text-white">Stadium Operations Command</h1>
-          <p className="text-xs text-gray-400 font-medium">Lusail Stadium Arena Monitor - Doha, QA</p>
+          <h1 className="text-base font-bold text-gray-800 dark:text-white">{t('title')}</h1>
+          <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
+            {primaryMatch ? `${primaryMatch.stadium} ${t('subTitle')} - ${getStadiumLocation(primaryMatch.stadium)}` : `Lusail Stadium ${t('subTitle')} - Doha, QA`}
+          </p>
         </div>
         <div className="flex items-center space-x-6 text-xs text-gray-500 dark:text-gray-400">
           <div className="flex items-center space-x-2">
-            <CloudSun className="w-4.5 h-4.5 text-amber-500" />
+            <CloudSun className="w-5 h-5 text-amber-500" />
             <div>
               <span className="font-semibold block text-gray-800 dark:text-gray-200">{weather.temp}°C {weather.condition}</span>
               <span className="text-[10px] text-gray-400">{weather.wind}</span>
             </div>
           </div>
           <div className="flex items-center space-x-2 border-l border-gray-200 dark:border-graphite-800 pl-4">
-            <Clock className="w-4.5 h-4.5 text-forest-500" />
+            <Clock className="w-5 h-5 text-forest-500" />
             <div>
-              <span className="font-semibold block text-gray-800 dark:text-gray-200">Ingestion Node</span>
-              <span className="text-[10px] text-gray-400">Sync Active</span>
+              <span className="font-semibold block text-gray-800 dark:text-gray-200">{t('weatherText')}</span>
+              <span className="text-[10px] text-gray-400">{isConnected ? t('liveSync') : t('disconnect')}</span>
             </div>
           </div>
         </div>
@@ -160,7 +177,7 @@ export const DashboardOverview: React.FC = () => {
                   </span>
                 ) : (
                   <span className="text-xs font-bold bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-xl border border-blue-500/20 tracking-wider">
-                    {new Date(primaryMatch.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} Kickoff
+                    {new Date(primaryMatch.dateTime).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true })} IST Kickoff
                   </span>
                 )}
                 <span className="text-lg md:text-2xl font-black tracking-tight text-white">{primaryMatch.awayTeam}</span>
@@ -173,7 +190,7 @@ export const DashboardOverview: React.FC = () => {
               )}
               {primaryMatch.status === 'SCHEDULED' && (
                 <p className="text-xs text-gray-400 font-medium">
-                  Scheduled Kickoff: <span className="font-bold text-white">{new Date(primaryMatch.dateTime).toLocaleDateString()}</span>
+                  Scheduled Kickoff: <span className="font-bold text-white">{new Date(primaryMatch.dateTime).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
                 </p>
               )}
             </div>
@@ -453,7 +470,7 @@ export const DashboardOverview: React.FC = () => {
                     <td className="py-3 font-semibold text-gray-800 dark:text-gray-300">{item.fileName}</td>
                     <td className="py-3 font-medium text-gray-600 dark:text-gray-400">{item.fileType}</td>
                     <td className="py-3">{item.parsedRecords} items</td>
-                    <td className="py-3">{new Date(item.uploadedAt).toLocaleString()}</td>
+                    <td className="py-3">{new Date(item.uploadedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
                     <td className="py-3">
                       <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
                         item.status === 'SUCCESS'

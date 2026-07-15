@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../app/providers';
-import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet';
+import L from 'leaflet';
 import { Users, ShieldAlert, ChevronRight, Activity, TrendingUp, Info } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -13,37 +13,41 @@ import {
 
 export const CrowdIntelligence: React.FC = () => {
   const { crowd } = useApp();
-  const [mapMounted, setMapMounted] = React.useState(false);
-  const [mapKey, setMapKey] = React.useState(`map-crowd-${Date.now()}`);
-
-  const mapRef = React.useCallback((node: HTMLDivElement | null) => {
-    if (node) {
-      const elements = node.querySelectorAll('*');
-      elements.forEach((el: any) => {
-        if (el._leaflet_id) {
-          el._leaflet_id = null;
-        }
-      });
-      if ((node as any)._leaflet_id) {
-        (node as any)._leaflet_id = null;
-      }
-    }
-  }, []);
 
   React.useEffect(() => {
-    setMapMounted(true);
-    return () => {
-      setMapMounted(false);
-      setMapKey(`map-crowd-${Date.now()}-${Math.random()}`);
-    };
-  }, []);
+    const container = document.getElementById('map-crowd');
+    if (!container) return;
+    
+    // Purge any existing leaflet instance properties
+    if ((container as any)._leaflet_id) {
+      (container as any)._leaflet_id = null;
+    }
+    
+    const map = L.map('map-crowd', { scrollWheelZoom: false }).setView([25.4208, 51.4886], 17);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    }).addTo(map);
 
-  const mockHeatzones = [
-    { center: [25.4215, 51.4880] as [number, number], color: '#ef4444', radius: 45, label: 'Gate A Queue Jam' },
-    { center: [25.4208, 51.4895] as [number, number], color: '#f59e0b', radius: 35, label: 'Gate B Heavy Arrivals' },
-    { center: [25.4201, 51.4886] as [number, number], color: '#10b981', radius: 25, label: 'Gate C Light Inflow' },
-    { center: [25.4206, 51.4880] as [number, number], color: '#ef4444', radius: 30, label: 'Food Court Food Hub 1 Spill' }
-  ];
+    const mockHeatzones = [
+      { center: [25.4215, 51.4880] as [number, number], color: '#ef4444', radius: 45, label: 'Gate A Queue Jam' },
+      { center: [25.4208, 51.4895] as [number, number], color: '#f59e0b', radius: 35, label: 'Gate B Heavy Arrivals' },
+      { center: [25.4201, 51.4886] as [number, number], color: '#10b981', radius: 25, label: 'Gate C Light Inflow' },
+      { center: [25.4206, 51.4880] as [number, number], color: '#ef4444', radius: 30, label: 'Food Court Food Hub 1 Spill' }
+    ];
+
+    mockHeatzones.forEach(zone => {
+      L.circle(zone.center, {
+        color: zone.color,
+        fillColor: zone.color,
+        fillOpacity: 0.4,
+        radius: zone.radius
+      }).addTo(map).bindPopup(`<span class="text-xs font-bold text-gray-800">${zone.label}</span>`);
+    });
+
+    return () => {
+      map.remove();
+    };
+  }, [crowd]);
 
   // Custom tooltips with premium glassmorphism styling
   const CustomForecastTooltip = ({ active, payload }: any) => {
@@ -66,17 +70,17 @@ export const CrowdIntelligence: React.FC = () => {
     <div className="space-y-6 font-sans">
       
       {/* CROWD INTEL HEADER */}
-      <div className="flex justify-between items-center premium-card p-4.5">
+      <div className="flex justify-between items-center premium-card p-5">
         <div>
           <h2 className="text-base font-bold text-gray-800 dark:text-white">Crowd Telemetry & Bottleneck Predictions</h2>
-          <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold">Real-time gate ingress counts and perimeter sensor heat zones tracking</p>
+          <p className="text-xs text-gray-400 dark:text-gray-550 font-semibold">Real-time gate ingress counts and perimeter sensor heat zones tracking</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* HEATMAP SCREEN PANEL */}
-        <div className="lg:col-span-2 premium-card p-4.5 space-y-4">
+        <div className="lg:col-span-2 premium-card p-5 space-y-4">
           <div className="flex justify-between items-center">
             <div>
               <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Crowd Heatmap Observation</h3>
@@ -89,27 +93,8 @@ export const CrowdIntelligence: React.FC = () => {
           </div>
 
           {/* LEAFLET MAP ELEMENT */}
-          <div ref={mapRef} className="h-96 rounded-xl overflow-hidden relative border border-gray-150 dark:border-graphite-800">
-            {mapMounted && (
-              <MapContainer key={mapKey} center={[25.4208, 51.4886]} zoom={17} scrollWheelZoom={false}>
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                {mockHeatzones.map((zone, idx) => (
-                  <Circle
-                    key={idx}
-                    center={zone.center}
-                    radius={zone.radius}
-                    pathOptions={{ color: zone.color, fillColor: zone.color, fillOpacity: 0.4 }}
-                  >
-                    <Popup>
-                      <span className="text-xs font-bold">{zone.label}</span>
-                    </Popup>
-                  </Circle>
-                ))}
-              </MapContainer>
-            )}
+          <div className="h-96 rounded-xl overflow-hidden relative border border-gray-150 dark:border-graphite-800 bg-gray-100 dark:bg-graphite-950">
+            <div id="map-crowd" className="h-full w-full z-10" />
           </div>
         </div>
 
@@ -117,7 +102,7 @@ export const CrowdIntelligence: React.FC = () => {
         <div className="space-y-6">
           
           {/* CROWD STATS PANEL */}
-          <div className="premium-card p-4.5 space-y-4">
+          <div className="premium-card p-5 space-y-4">
             <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Live Occupancy Diagnostics</h3>
             
             <div className="space-y-2.5">
@@ -141,7 +126,7 @@ export const CrowdIntelligence: React.FC = () => {
           </div>
 
           {/* SEC DIVISION METRICS WITH DETAILED PROGRESS BARS */}
-          <div className="premium-card p-4.5 space-y-4">
+          <div className="premium-card p-5 space-y-4">
             <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Sector Congestion Summary</h3>
             <div className="space-y-3">
               {crowd.sectors.map((sec, idx) => {
@@ -153,7 +138,7 @@ export const CrowdIntelligence: React.FC = () => {
                 return (
                   <div key={idx} className="space-y-1">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-gray-750 dark:text-gray-305">{sec.name}</span>
+                      <span className="font-bold text-gray-700 dark:text-gray-200">{sec.name}</span>
                       <div className="flex items-center space-x-2">
                         <span className="text-gray-400 font-semibold">{sec.occupancy.toLocaleString()} fans</span>
                         <span className={`px-1.5 py-0.25 rounded text-[8px] font-black tracking-wider uppercase ${
@@ -185,7 +170,7 @@ export const CrowdIntelligence: React.FC = () => {
       </div>
 
       {/* FORECAST TIMELINE CHART */}
-      <div className="premium-card p-4.5 space-y-4">
+      <div className="premium-card p-5 space-y-4">
         <div>
           <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Spectator Occupancy Forecast (24h)</h3>
           <p className="text-[10px] text-gray-405 dark:text-gray-500 font-semibold">Comparison of actual arrival telemetry against pre-match AI simulation curves</p>

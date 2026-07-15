@@ -48,6 +48,14 @@ export const Landing: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#070b0d] text-gray-100 flex flex-col font-sans relative overflow-hidden">
       
+      {/* Dynamic Animated Stadium Background Image (Ken Burns movement) */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-[0.045] dark:opacity-[0.06] z-0 animate-slow-zoom"
+        style={{ 
+          backgroundImage: "url('/stadium_bg.png'), url('/stadium_bg.jpg'), url('/stadium.jpg'), url('/bg.jpg')"
+        }}
+      />
+      
       {/* GLOWING AMBIENT GRADIENTS (Premium Vercel-style background glow) */}
       <div className="absolute top-[-10%] left-[-20%] w-[60%] aspect-square rounded-full bg-forest-500/10 blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] aspect-square rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
@@ -56,24 +64,26 @@ export const Landing: React.FC = () => {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-20" />
 
       {/* NAVBAR */}
-      <header className="flex h-16 items-center justify-between border-b border-gray-800/40 bg-[#070b0d]/75 backdrop-blur-md px-6 md:px-12 z-50 sticky top-0">
-        <div className="flex items-center space-x-2">
-          <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-8 h-8 rounded-lg object-contain border border-gray-800" />
+      <header className="mx-4 md:mx-8 mt-4 mb-2 bg-[#070b0d]/75 backdrop-blur-md border border-gray-800/40 rounded-full shadow-premium flex items-center justify-between h-14 px-5 md:px-6 z-50 sticky top-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center p-1 shadow-sm shrink-0">
+            <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-full h-full object-contain" />
+          </div>
           <div>
-            <span className="text-sm font-bold tracking-tight text-forest-400 block leading-none">VenueOS AI</span>
-            <span className="text-[9px] text-gray-500 font-semibold tracking-wider uppercase">World Cup Console</span>
+            <span className="text-xs font-black tracking-tight text-forest-400 block leading-none uppercase">VenueOS AI</span>
+            <span className="text-[9px] text-gray-500 font-bold tracking-wider uppercase">World Cup Console</span>
           </div>
         </div>
         <div className="flex items-center space-x-4">
           <Link
             to="/login"
-            className="text-xs font-semibold text-gray-400 hover:text-white transition-colors"
+            className="text-xs font-bold text-gray-400 hover:text-white transition-colors"
           >
             Sign In
           </Link>
           <Link
             to="/dashboard/overview"
-            className="px-4 py-1.5 bg-forest-500 hover:bg-forest-600 text-white rounded-lg text-xs font-bold shadow-lg shadow-forest-500/15 transition-all"
+            className="px-4 py-1.5 bg-forest-500 hover:bg-forest-600 text-white rounded-full text-xs font-bold shadow-lg shadow-forest-500/15 transition-all"
           >
             Launch Console
           </Link>
@@ -95,15 +105,15 @@ export const Landing: React.FC = () => {
         </motion.div>
 
         {/* HERO TITLE */}
-        <div className="space-y-4 max-w-3xl mx-auto">
+        <div className="space-y-4 max-w-4xl mx-auto">
           <motion.h1 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl md:text-6xl font-bold tracking-tight text-white leading-tight"
+            className="text-4xl md:text-7xl font-bold tracking-wide text-white leading-tight font-graffiti skew-x-[-6deg] select-none"
           >
             The Intelligent Operating System <br />
-            <span className="bg-gradient-to-r from-forest-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-400 via-teal-350 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(16,185,129,0.45)]">
               for Smart Stadiums
             </span>
           </motion.h1>
@@ -225,8 +235,10 @@ export const Landing: React.FC = () => {
       <section id="features" className="bg-[#0b1012] border-t border-gray-800/40 py-20 z-10">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
-            <h2 className="text-xs font-bold text-forest-400 uppercase tracking-widest">System Pillars</h2>
-            <h3 className="text-2xl md:text-3xl font-bold text-white">Full Stadium Control Suite</h3>
+            <h2 className="text-xs font-bold text-emerald-450 uppercase tracking-[0.2em]">System Pillars</h2>
+            <h3 className="text-3xl md:text-5xl font-bold text-white font-graffiti skew-x-[-4deg] drop-shadow-[0_2px_12px_rgba(16,185,129,0.35)] select-none">
+              Full Stadium Control Suite
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

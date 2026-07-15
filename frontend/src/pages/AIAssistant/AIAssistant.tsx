@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../app/providers';
+import { API_URL } from '../../config';
 import {
   MessageSquare,
   Send,
@@ -137,7 +138,7 @@ export const AIAssistant: React.FC = () => {
         content: m.content
       }));
 
-      const res = await fetch('http://localhost:3001/api/chat', {
+      const res = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -214,7 +215,7 @@ ${active.some(i=>i.severity==='CRITICAL') ? `> [!IMPORTANT]\n> Turnstile readers
       if (scheduled.length > 0) {
         details += `### Upcoming Matches Today\n\n`;
         scheduled.forEach(m => {
-          const timeStr = new Date(m.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const timeStr = new Date(m.dateTime).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true }) + ' IST';
           details += `* **${m.homeTeam} vs ${m.awayTeam}** - Scheduled kickoff at **${timeStr}** (${m.group})\n`;
         });
         details += `\n`;
@@ -298,7 +299,7 @@ Ask me details about queue times, medical dispatches, or power grids.`;
                   <div className={`p-4 rounded-2xl text-sm leading-relaxed border shadow-premium-lg ${
                     m.role === 'user'
                       ? 'bg-gradient-to-r from-forest-500 to-forest-600 text-white border-forest-650 rounded-tr-none'
-                      : 'bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md text-gray-800 dark:text-gray-205 border-gray-150/40 dark:border-graphite-800/40 rounded-tl-none'
+                      : 'bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md text-gray-800 dark:text-gray-200 border-gray-150/40 dark:border-graphite-800/40 rounded-tl-none'
                   }`}>
                     <div className="space-y-2.5">
                       {m.content.split('\n').map((line, lIdx) => {
@@ -306,12 +307,12 @@ Ask me details about queue times, medical dispatches, or power grids.`;
                           return <h4 key={lIdx} className="font-bold text-sm text-gray-900 dark:text-white pt-1">{line.replace('###', '')}</h4>;
                         }
                         if (line.startsWith('*')) {
-                          return <p key={lIdx} className="pl-3.5 relative before:absolute before:left-0 before:content-['•'] text-gray-650 dark:text-gray-305 font-semibold">{line.replace('*', '').trim()}</p>;
+                          return <p key={lIdx} className="pl-3.5 relative before:absolute before:left-0 before:content-['•'] text-gray-600 dark:text-gray-300 font-semibold">{line.replace('*', '').trim()}</p>;
                         }
                         if (line.startsWith('>')) {
                           return <div key={lIdx} className="p-3 border-l-3 border-amber-500 bg-amber-500/5 text-xs my-1.5 rounded-lg font-medium">{line.replace(/[>!\[\]]/g, '')}</div>;
                         }
-                        return <p key={lIdx} className="font-semibold text-gray-700 dark:text-gray-305">{line}</p>;
+                        return <p key={lIdx} className="font-semibold text-gray-700 dark:text-gray-200">{line}</p>;
                       })}
                     </div>
                   </div>

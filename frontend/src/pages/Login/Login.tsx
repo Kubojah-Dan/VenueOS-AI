@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useApp } from '../../app/providers';
-import { Shield, Key, Mail, Lock } from 'lucide-react';
+import { useApp, type UserRole } from '../../app/providers';
+import { Shield, Mail, Lock } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const { role, setRole } = useApp();
   const [email, setEmail] = useState('director@worldcup2026.org');
-  const [password, setPassword] = useState('••••••••••••');
+  const [password, setPassword] = useState('password123');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Proceed directly to the dashboard overview.
+    const lowerEmail = email.toLowerCase();
+    if (lowerEmail.includes('security')) {
+      setRole('Security');
+    } else if (lowerEmail.includes('volunteer')) {
+      setRole('Volunteer');
+    } else if (lowerEmail.includes('fan')) {
+      setRole('Fan');
+    } else {
+      setRole('Operations');
+    }
     navigate('/dashboard/overview');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-graphite-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-gray-50 dark:bg-graphite-955 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link to="/" className="inline-flex items-center space-x-2">
           <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-10 h-10 rounded-xl object-contain border border-gray-150 dark:border-graphite-800" />
@@ -41,7 +50,7 @@ export const Login: React.FC = () => {
               </label>
               <div className="relative rounded-lg shadow-sm">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Mail className="h-4 h-4 text-gray-400" />
+                  <Mail className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   type="email"
@@ -62,7 +71,7 @@ export const Login: React.FC = () => {
               </label>
               <div className="relative rounded-lg shadow-sm">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Lock className="h-4 h-4 text-gray-400" />
+                  <Lock className="h-4 w-4 text-gray-400" />
                 </div>
                 <input
                   type="password"
@@ -83,7 +92,14 @@ export const Login: React.FC = () => {
               </label>
               <select
                 value={role}
-                onChange={(e) => setRole(e.target.value as any)}
+                onChange={(e) => {
+                  const selectedRole = e.target.value as UserRole;
+                  setRole(selectedRole);
+                  if (selectedRole === 'Operations') setEmail('director@worldcup2026.org');
+                  else if (selectedRole === 'Security') setEmail('security@worldcup2026.org');
+                  else if (selectedRole === 'Volunteer') setEmail('volunteer@worldcup2026.org');
+                  else if (selectedRole === 'Fan') setEmail('fan@worldcup2026.org');
+                }}
                 className="block w-full rounded-lg border border-gray-200 dark:border-graphite-800 bg-white dark:bg-graphite-950 py-2.5 px-3 text-xs focus:border-forest-500 focus:outline-none focus:ring-1 focus:ring-forest-500 text-gray-800 dark:text-gray-300"
               >
                 <option value="Operations">Operations Center Director</option>

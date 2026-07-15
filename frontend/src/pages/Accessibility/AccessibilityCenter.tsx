@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useApp } from '../../app/providers';
 import {
   Accessibility,
   HeartHandshake,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 
 export const AccessibilityCenter: React.FC = () => {
+  const { language, setLanguage, t } = useApp();
   const [assistanceStatus, setAssistanceStatus] = useState<'IDLE' | 'REQUESTING' | 'SENT'>('IDLE');
   const [requestSector, setRequestSector] = useState('');
   const [assistanceType, setAssistanceType] = useState('Wheelchair Escort');
@@ -36,20 +38,20 @@ export const AccessibilityCenter: React.FC = () => {
     <div className="space-y-6 font-sans">
       
       {/* ACCESSIBILITY SUBHEADER */}
-      <div className="flex justify-between items-center premium-card p-4.5">
+      <div className="flex justify-between items-center premium-card p-5">
         <div>
           <h2 className="text-base font-bold text-gray-800 dark:text-white">Spectator Accessibility & Support Center</h2>
-          <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold">Elevator telemetry status, translation assists, and wheelchair escort dispatches</p>
+          <p className="text-xs text-gray-400 dark:text-gray-550 font-semibold">Elevator telemetry status, translation assists, and wheelchair escort dispatches</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* FACILITIES MONITORING */}
-        <div className="lg:col-span-2 premium-card p-4.5 space-y-4">
+        <div className="lg:col-span-2 premium-card p-5 space-y-4">
           <div className="flex items-center space-x-2">
-            <Accessibility className="w-4.5 h-4.5 text-forest-500" />
-            <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Facility Status Monitoring</h3>
+            <Accessibility className="w-5 h-5 text-forest-500" />
+            <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">{t('facilityStatus')}</h3>
           </div>
           
           <div className="space-y-3">
@@ -59,7 +61,7 @@ export const AccessibilityCenter: React.FC = () => {
                   <span className="font-bold text-gray-750 dark:text-gray-300 block">{f.name}</span>
                   <span className="text-[10px] text-gray-400 font-semibold">{f.type}</span>
                 </div>
-                <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${
+                <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
                   f.status === 'OPERATIONAL'
                     ? 'bg-emerald-500/10 text-emerald-600'
                     : 'bg-amber-500/10 text-amber-500'
@@ -75,10 +77,10 @@ export const AccessibilityCenter: React.FC = () => {
         <div className="space-y-6">
           
           {/* DISPATCH ESCORT MODAL */}
-          <div className="premium-card p-4.5 space-y-4">
+          <div className="premium-card p-5 space-y-4">
             <div className="flex items-center space-x-2">
-              <HeartHandshake className="w-4.5 h-4.5 text-forest-500" />
-              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Request Escort Assistance</h3>
+              <HeartHandshake className="w-5 h-5 text-forest-500" />
+              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">{t('escortRequest')}</h3>
             </div>
 
             {assistanceStatus === 'SENT' ? (
@@ -98,11 +100,11 @@ export const AccessibilityCenter: React.FC = () => {
             ) : (
               <form onSubmit={handleRequestAssistance} className="space-y-3 text-xs">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Escort Support Profile</label>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{t('escortProfile')}</label>
                   <select
                     value={assistanceType}
                     onChange={(e) => setAssistanceType(e.target.value)}
-                    className="w-full bg-white dark:bg-graphite-950 border border-gray-250 dark:border-graphite-850 p-2 rounded-lg text-xs text-gray-800 dark:text-gray-305"
+                    className="w-full bg-white dark:bg-graphite-955 border border-gray-250 dark:border-graphite-850 p-2 rounded-lg text-xs text-gray-800 dark:text-gray-200"
                   >
                     <option value="Wheelchair Escort">Wheelchair Escort Dispatch</option>
                     <option value="Vision Guide">Vision Assistant Guide</option>
@@ -111,13 +113,13 @@ export const AccessibilityCenter: React.FC = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Target Sector / Seating Section</label>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{t('seatingSection')}</label>
                   <input
                     type="text"
                     placeholder="e.g. Block 102 Row G Seat 12"
                     value={requestSector}
                     onChange={(e) => setRequestSector(e.target.value)}
-                    className="w-full bg-white dark:bg-graphite-950 border border-gray-250 dark:border-graphite-850 p-2 rounded-lg text-xs text-gray-905 dark:text-white"
+                    className="w-full bg-white dark:bg-graphite-955 border border-gray-250 dark:border-graphite-850 p-2 rounded-lg text-xs text-gray-905 dark:text-white"
                     required
                   />
                 </div>
@@ -127,36 +129,67 @@ export const AccessibilityCenter: React.FC = () => {
                   disabled={assistanceStatus === 'REQUESTING'}
                   className="w-full py-2 bg-forest-500 hover:bg-forest-600 disabled:bg-gray-350 text-white font-bold rounded-lg shadow-premium text-xs transition-all"
                 >
-                  {assistanceStatus === 'REQUESTING' ? 'Dispatching Staff...' : 'Request Rapid Assistance'}
+                  {assistanceStatus === 'REQUESTING' ? 'Dispatching Staff...' : t('dispatchButton')}
                 </button>
               </form>
             )}
           </div>
 
           {/* MULTILINGUAL VOICES MOCKS */}
-          <div className="premium-card p-4.5 space-y-4">
+          <div className="premium-card p-5 space-y-4">
             <div className="flex items-center space-x-2">
-              <Languages className="w-4.5 h-4.5 text-forest-500" />
-              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Language Vocal Assistance</h3>
+              <Languages className="w-5 h-5 text-forest-500" />
+              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">{t('languageAssistance')}</h3>
             </div>
             
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold leading-relaxed">
+            <p className="text-[10px] text-gray-400 dark:text-gray-550 font-semibold leading-relaxed">
               Activate automated translation helpers to translate stadium PA alerts for multilingual tournament spectators.
             </p>
 
-            <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
-              <button className="p-2.5 border border-gray-250 dark:border-graphite-850 rounded-xl hover:bg-gray-50 dark:hover:bg-graphite-850 flex items-center justify-between text-gray-700 dark:text-gray-305">
+            <div className="grid grid-cols-2 gap-2 text-xs font-bold">
+              <button 
+                onClick={() => setLanguage('en')}
+                className={`py-2.5 px-3 border rounded-xl flex items-center justify-between transition-all ${
+                  language === 'en'
+                    ? 'border-forest-500 bg-forest-500/5 text-forest-500 dark:text-forest-400'
+                    : 'border-gray-250 dark:border-graphite-850 text-gray-650 dark:text-gray-400 hover:bg-gray-55 dark:hover:bg-graphite-855'
+                }`}
+              >
                 <span>English</span>
-                <span className="text-[10px] text-emerald-600 font-extrabold">Active</span>
+                {language === 'en' && <span className="text-[10px] text-emerald-600 font-extrabold">{t('activeLabel')}</span>}
               </button>
-              <button className="p-2.5 border border-gray-250 dark:border-graphite-850 rounded-xl hover:bg-gray-50 dark:hover:bg-graphite-850 flex items-center justify-between text-gray-650 dark:text-gray-400">
+              <button 
+                onClick={() => setLanguage('es')}
+                className={`py-2.5 px-3 border rounded-xl flex items-center justify-between transition-all ${
+                  language === 'es'
+                    ? 'border-forest-500 bg-forest-500/5 text-forest-500 dark:text-forest-400'
+                    : 'border-gray-250 dark:border-graphite-850 text-gray-650 dark:text-gray-400 hover:bg-gray-55 dark:hover:bg-graphite-855'
+                }`}
+              >
                 <span>Español</span>
+                {language === 'es' && <span className="text-[10px] text-emerald-600 font-extrabold">{t('activeLabel')}</span>}
               </button>
-              <button className="p-2.5 border border-gray-250 dark:border-graphite-850 rounded-xl hover:bg-gray-50 dark:hover:bg-graphite-850 flex items-center justify-between text-gray-650 dark:text-gray-400">
-                <span>العربية</span>
+              <button 
+                onClick={() => setLanguage('ar')}
+                className={`py-2.5 px-3 border rounded-xl flex items-center justify-between transition-all ${
+                  language === 'ar'
+                    ? 'border-forest-500 bg-forest-500/5 text-forest-500 dark:text-forest-400'
+                    : 'border-gray-250 dark:border-graphite-850 text-gray-650 dark:text-gray-400 hover:bg-gray-55 dark:hover:bg-graphite-855'
+                }`}
+              >
+                <span className="leading-none">العربية</span>
+                {language === 'ar' && <span className="text-[10px] text-emerald-600 font-extrabold">{t('activeLabel')}</span>}
               </button>
-              <button className="p-2.5 border border-gray-250 dark:border-graphite-850 rounded-xl hover:bg-gray-50 dark:hover:bg-graphite-850 flex items-center justify-between text-gray-650 dark:text-gray-400">
+              <button 
+                onClick={() => setLanguage('fr')}
+                className={`py-2.5 px-3 border rounded-xl flex items-center justify-between transition-all ${
+                  language === 'fr'
+                    ? 'border-forest-500 bg-forest-500/5 text-forest-500 dark:text-forest-400'
+                    : 'border-gray-250 dark:border-graphite-850 text-gray-650 dark:text-gray-400 hover:bg-gray-55 dark:hover:bg-graphite-855'
+                }`}
+              >
                 <span>Français</span>
+                {language === 'fr' && <span className="text-[10px] text-emerald-600 font-extrabold">{t('activeLabel')}</span>}
               </button>
             </div>
           </div>

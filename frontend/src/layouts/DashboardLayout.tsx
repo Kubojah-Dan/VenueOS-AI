@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp, type UserRole } from '../app/providers';
 import {
@@ -24,8 +24,26 @@ import {
   Shield,
   Activity,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
+
+const getTranslationKey = (name: string): string => {
+  const map: Record<string, string> = {
+    'Overview': 'overview',
+    'Operations Center': 'operations',
+    'Crowd Intelligence': 'crowd',
+    'Navigation Center': 'navigation',
+    'AI Assistant': 'assistant',
+    'Upload Center': 'upload',
+    'Emergency Center': 'emergency',
+    'Accessibility Center': 'accessibility',
+    'Sustainability': 'sustainability',
+    'Reports': 'reports',
+    'Settings': 'settings'
+  };
+  return map[name] || name;
+};
 
 export const DashboardLayout: React.FC = () => {
   const {
@@ -35,13 +53,71 @@ export const DashboardLayout: React.FC = () => {
     toggleTheme,
     isConnected,
     notifications,
-    clearNotifications
+    clearNotifications,
+    t
   } = useApp();
   
   const location = useLocation();
+  const navigate = useNavigate();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const getRoleAllowedPaths = (currentRole: UserRole) => {
+    switch (currentRole) {
+      case 'Operations':
+        return [
+          '/dashboard/overview',
+          '/dashboard/operations',
+          '/dashboard/crowd',
+          '/dashboard/navigation',
+          '/dashboard/ai-assistant',
+          '/dashboard/upload-center',
+          '/dashboard/emergency',
+          '/dashboard/accessibility',
+          '/dashboard/sustainability',
+          '/dashboard/reports',
+          '/dashboard/settings'
+        ];
+      case 'Security':
+        return [
+          '/dashboard/overview',
+          '/dashboard/operations',
+          '/dashboard/crowd',
+          '/dashboard/navigation',
+          '/dashboard/ai-assistant',
+          '/dashboard/emergency'
+        ];
+      case 'Volunteer':
+        return [
+          '/dashboard/overview',
+          '/dashboard/navigation',
+          '/dashboard/ai-assistant',
+          '/dashboard/accessibility',
+          '/dashboard/sustainability'
+        ];
+      case 'Fan':
+      default:
+        return [
+          '/dashboard/overview',
+          '/dashboard/navigation',
+          '/dashboard/accessibility',
+          '/dashboard/sustainability'
+        ];
+    }
+  };
+
+  const handleSignOut = () => {
+    setRole('Fan');
+    navigate('/login');
+  };
+
+  React.useEffect(() => {
+    const allowed = getRoleAllowedPaths(role);
+    if (!allowed.includes(location.pathname)) {
+      navigate('/dashboard/overview');
+    }
+  }, [role, location.pathname, navigate]);
 
   const navigationItems = [
     { name: 'Overview', path: '/dashboard/overview', icon: LayoutDashboard },
@@ -57,6 +133,9 @@ export const DashboardLayout: React.FC = () => {
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ];
 
+  const allowedPaths = getRoleAllowedPaths(role);
+  const filteredNavigationItems = navigationItems.filter(item => allowedPaths.includes(item.path));
+
   const getRoleIcon = (currentRole: UserRole) => {
     switch (currentRole) {
       case 'Security':
@@ -70,36 +149,43 @@ export const DashboardLayout: React.FC = () => {
     }
   };
 
-  const currentPathName = navigationItems.find(item => item.path === location.pathname)?.name || 'Stadium Dashboard';
+  const currentItem = navigationItems.find(item => item.path === location.pathname);
+  const currentPathName = currentItem ? t(getTranslationKey(currentItem.name)) : 'Stadium Dashboard';
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-graphite-950">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-graphite-950 relative">
+      
+      {/* Foggy Background Image Layer */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-[0.05] dark:opacity-[0.08] z-0 filter blur-[3px] saturate-[110%]"
+        style={{ 
+          backgroundImage: "url('/stadium_bg.png'), url('/stadium_bg.jpg'), url('/stadium.jpg'), url('/bg.jpg')" 
+        }}
+      />
       
       {/* SIDEBAR FOR DESKTOP */}
-      <aside className="hidden md:flex md:flex-col md:w-64 bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md border-r border-gray-150/40 dark:border-graphite-800/40">
+      <aside className="hidden md:flex md:flex-col md:w-64 my-4 ml-4 bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md border border-gray-150/40 dark:border-graphite-800/40 rounded-3xl shadow-premium shrink-0 relative z-10">
         
         {/* LOGO AREA */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-150/40 dark:border-graphite-800/40">
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-white dark:bg-graphite-950 border border-gray-150/50 dark:border-graphite-850 flex items-center justify-center p-1.5 shrink-0 shadow-sm">
-              <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <h1 className="text-xs font-black tracking-tight text-forest-500 dark:text-forest-400 uppercase">VenueOS AI</h1>
-              <p className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">World Cup 2026</p>
-            </div>
-          </Link>
+        <div className="flex items-center space-x-3 px-6 py-5 border-b border-gray-150/40 dark:border-graphite-800/40">
+          <div className="w-8 h-8 rounded-full bg-white dark:bg-graphite-955 border border-gray-150/50 dark:border-graphite-850 flex items-center justify-center p-1 shadow-sm shrink-0">
+            <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-full h-full object-contain animate-spin-slow" />
+          </div>
+          <div>
+            <span className="text-xs font-black tracking-tight text-forest-500 dark:text-forest-400 block leading-none uppercase">VenueOS AI</span>
+            <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold tracking-wider uppercase">World Cup 2026</span>
+          </div>
         </div>
 
         {/* NAVIGATION LINKS */}
-        <nav className="flex-1 px-4 py-5 space-y-1.5 overflow-y-auto">
-          {navigationItems.map((item) => {
+        <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+          {filteredNavigationItems.map((item) => {
             const Icon = item.icon;
             return (
               <motion.div
                 key={item.path}
                 whileHover={{ x: 3 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
                 <NavLink
                   to={item.path}
@@ -112,8 +198,8 @@ export const DashboardLayout: React.FC = () => {
                   }
                 >
                   <div className="flex items-center space-x-3.5">
-                    <Icon className="w-4.5 h-4.5" />
-                    <span>{item.name}</span>
+                    <Icon className="w-5 h-5" />
+                    <span>{t(getTranslationKey(item.name))}</span>
                   </div>
                   {item.badge && (
                     <span className="px-2 py-0.5 text-[9.5px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded-full border border-amber-500/20 uppercase tracking-wider">
@@ -131,11 +217,11 @@ export const DashboardLayout: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-              className="flex items-center justify-between w-full px-4 py-2.5 bg-white/70 dark:bg-graphite-900/70 border border-gray-200 dark:border-graphite-800 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-graphite-850 shadow-premium"
+              className="flex items-center justify-between w-full px-4 py-2.5 bg-white/70 dark:bg-graphite-900/70 border border-gray-200 dark:border-graphite-800 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-55 dark:hover:bg-graphite-850 shadow-premium"
             >
               <div className="flex items-center space-x-2.5">
                 {getRoleIcon(role)}
-                <span>Role: {role}</span>
+                <span>{t('roleLabel')}: {role}</span>
               </div>
               <ChevronDown className="w-4 h-4 text-gray-450" />
             </button>
@@ -153,7 +239,7 @@ export const DashboardLayout: React.FC = () => {
                     }`}
                   >
                     {getRoleIcon(r)}
-                    <span>{r} View</span>
+                    <span>{r} {t('roleLabel').toLowerCase() === 'role' ? 'View' : t('roleLabel')}</span>
                   </button>
                 ))}
               </div>
@@ -163,7 +249,7 @@ export const DashboardLayout: React.FC = () => {
       </aside>
 
       {/* MOBILE HEADER MENU */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden relative z-10">
         
         {/* FLOATING DETACHED GLASSMORPHIC ROUND NAVIGATION BAR */}
         <header className="mx-4 md:mx-8 mt-4 mb-2 bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md border border-gray-150/40 dark:border-graphite-800/40 rounded-full shadow-premium flex items-center justify-between h-14 px-5 md:px-6 shrink-0 z-40">
@@ -197,7 +283,7 @@ export const DashboardLayout: React.FC = () => {
                 : 'bg-red-500/10 text-red-500 animate-pulse'
             }`}>
               {isConnected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
-              <span className="hidden sm:inline">{isConnected ? 'Live Sync Active' : 'Disconnected'}</span>
+              <span className="hidden sm:inline">{isConnected ? t('liveSync') : t('disconnect')}</span>
             </div>
 
             {/* LIGHT/DARK TOGGLE */}
@@ -206,7 +292,7 @@ export const DashboardLayout: React.FC = () => {
               className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-graphite-800 transition-colors"
               title="Toggle design mode"
             >
-              {theme === 'light' ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
+              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
 
             {/* LIVE NOTIFICATIONS ALERTS DROPDOWN */}
@@ -215,7 +301,7 @@ export const DashboardLayout: React.FC = () => {
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                 className="relative p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-graphite-800 transition-colors"
               >
-                <Bell className="w-4.5 h-4.5" />
+                <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
                   <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white dark:border-graphite-900"></span>
                 )}
@@ -235,7 +321,7 @@ export const DashboardLayout: React.FC = () => {
                   </div>
                   <div className="max-h-60 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="p-5 text-center text-xs text-gray-400 dark:text-gray-500 font-semibold">
+                      <div className="p-5 text-center text-xs text-gray-400 dark:text-gray-550 font-semibold">
                         No telemetry logs available.
                       </div>
                     ) : (
@@ -253,19 +339,29 @@ export const DashboardLayout: React.FC = () => {
               )}
             </div>
 
-            {/* USER AVATAR / PROFILE */}
+            {/* USER AVATAR / PROFILE & SIGN OUT */}
             <div className="flex items-center space-x-2 border-l border-gray-200/50 dark:border-graphite-800/50 pl-3">
-              <div className="w-8 h-8 rounded-full bg-forest-500/10 text-forest-500 dark:text-forest-400 flex items-center justify-center font-bold text-xs shrink-0 border border-forest-500/10">
-                OP
+              <div className="w-8 h-8 rounded-full bg-forest-500/10 text-forest-500 dark:text-forest-400 flex items-center justify-center font-bold text-xs shrink-0 border border-forest-500/10" title={`Active Role: ${role}`}>
+                {role.substring(0, 2).toUpperCase()}
               </div>
-              <span className="text-xs font-bold text-gray-750 dark:text-gray-200 hidden lg:block">Shifty Director</span>
+              <div className="hidden lg:flex flex-col text-left">
+                <span className="text-[10px] font-bold text-gray-750 dark:text-gray-200 leading-none">{role} Director</span>
+                <span className="text-[8px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider mt-0.5">{role} View</span>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="p-1.5 rounded-lg text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-graphite-800 transition-colors"
+                title={t('signOut')}
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
 
           </div>
         </header>
 
         {/* MAIN BODY OUTLET CONTAINER WITH TRANSITIONS */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-2 md:pt-4 bg-gray-50 dark:bg-graphite-950">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-2 md:pt-4 bg-gray-55/40 dark:bg-graphite-955/40">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -286,14 +382,14 @@ export const DashboardLayout: React.FC = () => {
         <div className="fixed inset-0 z-50 flex md:hidden">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
           <div className="relative flex flex-col w-64 bg-white/95 dark:bg-graphite-900/95 backdrop-blur-md border-r border-gray-200/40 dark:border-graphite-800/45">
-            <div className="flex items-center justify-between px-6 py-4.5 border-b border-gray-200 dark:border-graphite-800">
-              <span className="text-sm font-bold text-forest-500 dark:text-forest-400">VenueOS Menu</span>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-graphite-800">
+              <span className="text-sm font-bold text-forest-500 dark:text-forest-400">{t('title')}</span>
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-graphite-800 rounded-lg">
-                <X className="w-5.5 h-5.5" />
+                <X className="w-5 h-5" />
               </button>
             </div>
             <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-              {navigationItems.map((item) => {
+              {filteredNavigationItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <NavLink
@@ -309,8 +405,8 @@ export const DashboardLayout: React.FC = () => {
                     }
                   >
                     <div className="flex items-center space-x-3.5">
-                      <Icon className="w-4.5 h-4.5" />
-                      <span>{item.name}</span>
+                      <Icon className="w-5 h-5" />
+                      <span>{t(getTranslationKey(item.name))}</span>
                     </div>
                   </NavLink>
                 );

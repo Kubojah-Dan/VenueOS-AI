@@ -1,4 +1,9 @@
 import * as admin from 'firebase-admin';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load environment variables immediately to resolve import race conditions
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 let firestoreDb: admin.firestore.Firestore | null = null;
 let realtimeDb: admin.database.Database | null = null;

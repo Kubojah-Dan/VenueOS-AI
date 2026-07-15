@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useApp } from '../../app/providers';
+import { API_URL } from '../../config';
 import {
   Upload,
   File,
@@ -72,7 +73,7 @@ export const UploadCenter: React.FC = () => {
         });
       }, 200);
 
-      const res = await fetch('http://localhost:3001/api/upload', {
+      const res = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formData
       });
@@ -299,7 +300,7 @@ export const UploadCenter: React.FC = () => {
               {uploadHistory.map((item) => (
                 <tr key={item.id} className="border-b border-gray-55 dark:border-graphite-850 hover:bg-gray-50/50 dark:hover:bg-graphite-850/50">
                   <td className="py-3 font-semibold text-gray-850 dark:text-gray-250">
-                    {new Date(item.uploadedAt).toLocaleString()}
+                    {new Date(item.uploadedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
                   </td>
                   <td className="py-3 text-gray-650 dark:text-gray-400 font-medium">{item.fileName}</td>
                   <td className="py-3 text-gray-600 dark:text-gray-400">{(item.fileSize / 1024).toFixed(1)} KB</td>

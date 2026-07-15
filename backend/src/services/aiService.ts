@@ -195,7 +195,7 @@ Here is the real-time ecological efficiency breakdown:
       if (scheduled.length > 0) {
         details += `### Upcoming Matches Today\n\n`;
         scheduled.forEach(m => {
-          const timeStr = new Date(m.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const timeStr = new Date(m.dateTime).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true }) + ' IST';
           details += `* **${m.homeTeam} vs ${m.awayTeam}** - Scheduled kickoff at **${timeStr}** (${m.group})\n`;
         });
         details += `\n`;

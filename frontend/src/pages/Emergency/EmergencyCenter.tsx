@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export const EmergencyCenter: React.FC = () => {
-  const { incidents } = useApp();
+  const { incidents, t } = useApp();
   const [paScript, setPaScript] = useState('');
   const [isSpeaking, setIsSpeaking] = useState(false);
 
@@ -69,10 +69,10 @@ export const EmergencyCenter: React.FC = () => {
     <div className="space-y-6 font-sans">
       
       {/* EMERGENCY SUBHEADER */}
-      <div className="flex justify-between items-center premium-card p-4.5">
+      <div className="flex justify-between items-center premium-card p-5">
         <div>
           <h2 className="text-base font-bold text-gray-800 dark:text-white">Emergency Coordination & Megaphone Broadcasts</h2>
-          <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold">Global venue alert thresholds, evacuation mapping, and public warning script generators</p>
+          <p className="text-xs text-gray-400 dark:text-gray-550 font-semibold">Global venue alert thresholds, evacuation mapping, and public warning script generators</p>
         </div>
       </div>
 
@@ -84,9 +84,9 @@ export const EmergencyCenter: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             
             {/* RISK LEVEL STATUS */}
-            <div className="premium-card p-4.5 flex flex-col justify-between min-h-[135px]">
+            <div className="premium-card p-5 flex flex-col justify-between h-32">
               <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Stadium Risk Index</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">{t('riskIndex')}</span>
                 <span className={`text-2xl font-extrabold mt-1.5 block ${
                   riskScore > 60 ? 'text-red-500 animate-pulse' : riskScore > 30 ? 'text-amber-500' : 'text-emerald-600'
                 }`}>
@@ -99,18 +99,18 @@ export const EmergencyCenter: React.FC = () => {
             </div>
 
             {/* SEVERE INCIDENTS */}
-            <div className="premium-card p-4.5 flex flex-col justify-between min-h-[135px]">
+            <div className="premium-card p-5 flex flex-col justify-between h-32">
               <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Severe Incidents</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">{t('severeIncidents')}</span>
                 <span className="text-2xl font-extrabold mt-1.5 text-gray-800 dark:text-white block">{criticalCount}</span>
               </div>
               <span className="text-[10px] text-gray-400 font-bold block">Severity High or Critical</span>
             </div>
 
             {/* VOLUNTEER ALERTS */}
-            <div className="premium-card p-4.5 flex flex-col justify-between min-h-[135px]">
+            <div className="premium-card p-5 flex flex-col justify-between h-32">
               <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Responders Dispatched</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">{t('respondersDispatched')}</span>
                 <span className="text-2xl font-extrabold mt-1.5 text-gray-800 dark:text-white block">
                   {activeIncidents.filter(i=>i.assignedTeam!=='Unassigned Patrol').length}
                 </span>
@@ -121,10 +121,10 @@ export const EmergencyCenter: React.FC = () => {
           </div>
 
           {/* PA SCRIPT MEGA BROADCAS CONTROL */}
-          <div className="premium-card p-4.5 space-y-4">
+          <div className="premium-card p-5 space-y-4">
             <div className="flex items-center space-x-2">
-              <Megaphone className="w-4.5 h-4.5 text-forest-500" />
-              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Megaphone Alert PA Script Generator</h3>
+              <Megaphone className="w-5 h-5 text-forest-500" />
+              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">{t('paScriptGen')}</h3>
             </div>
             
             <div className="flex flex-wrap gap-2">
@@ -136,7 +136,7 @@ export const EmergencyCenter: React.FC = () => {
               </button>
               <button
                 onClick={() => handleGeneratePA('congestion')}
-                className="px-3 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20 rounded-md text-[10px] font-bold transition-all"
+                className="px-3 py-1.5 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 rounded-md text-[10px] font-bold transition-all"
               >
                 Gate Congestion Redirect
               </button>
@@ -148,26 +148,24 @@ export const EmergencyCenter: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-3">
-              <textarea
-                value={paScript}
-                onChange={(e) => setPaScript(e.target.value)}
-                className="w-full h-28 bg-gray-55 dark:bg-graphite-955 border border-gray-250 dark:border-graphite-850 p-3 rounded-lg text-xs leading-relaxed text-gray-800 dark:text-gray-300 font-bold uppercase focus:outline-none focus:ring-1 focus:ring-red-500"
-                placeholder="Select a template above or draft custom PA announcements here..."
-              ></textarea>
+            <textarea
+              className="w-full bg-white dark:bg-graphite-950 border border-gray-250 dark:border-graphite-850 p-3 rounded-xl text-xs font-semibold leading-relaxed text-gray-800 dark:text-gray-200 h-28 focus:ring-1 focus:ring-forest-500"
+              placeholder="SELECT A TEMPLATE ABOVE OR DRAFT CUSTOM PA ANNOUNCEMENTS HERE..."
+              value={paScript}
+              onChange={(e) => setPaScript(e.target.value)}
+            ></textarea>
 
-              {paScript.length > 0 && (
-                <div className="flex justify-end">
-                  <button
-                    onClick={speakPA}
-                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-forest-500 hover:bg-forest-600 text-white rounded-lg text-xs font-semibold shadow-premium transition-all"
-                  >
-                    <Volume2 className="w-3.5 h-3.5" />
-                    <span>{isSpeaking ? 'Stop Vocalizer' : 'Vocalize announcement'}</span>
-                  </button>
-                </div>
-              )}
-            </div>
+            {paScript.length > 0 && (
+              <div className="flex justify-end">
+                <button
+                  onClick={speakPA}
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-forest-500 hover:bg-forest-600 text-white rounded-lg text-xs font-semibold shadow-premium transition-all"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                  <span>{isSpeaking ? 'Stop Vocalizer' : 'Vocalize announcement'}</span>
+                </button>
+              </div>
+            )}
           </div>
 
         </div>
@@ -176,14 +174,14 @@ export const EmergencyCenter: React.FC = () => {
         <div className="space-y-6">
           
           {/* HOTLINES LIST */}
-          <div className="premium-card p-4.5 space-y-4">
+          <div className="premium-card p-5 space-y-4">
             <div className="flex items-center space-x-2">
-              <PhoneCall className="w-4.5 h-4.5 text-red-500" />
-              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Core Dispatch Lines</h3>
+              <PhoneCall className="w-5 h-5 text-red-500" />
+              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">{t('coreDispatch')}</h3>
             </div>
             <div className="space-y-3">
               {emergencyContacts.map((ct, idx) => (
-                <div key={idx} className="flex justify-between items-center text-xs p-2.5 bg-gray-50/50 dark:bg-graphite-850/50 rounded-xl border border-gray-150/20 dark:border-graphite-800/20">
+                <div key={idx} className="flex justify-between items-center text-xs p-2.5 bg-gray-55/50 dark:bg-graphite-850/50 rounded-xl border border-gray-150/20 dark:border-graphite-800/20">
                   <div>
                     <span className="font-bold text-gray-800 dark:text-gray-200 block">{ct.title}</span>
                     <span className="text-[10px] text-gray-400 font-semibold">{ct.phone}</span>
@@ -199,10 +197,10 @@ export const EmergencyCenter: React.FC = () => {
           </div>
 
           {/* EVACUATION SECTOR DIRECTIONS */}
-          <div className="premium-card p-4.5 space-y-4">
+          <div className="premium-card p-5 space-y-4">
             <div className="flex items-center space-x-2">
-              <Navigation className="w-4.5 h-4.5 text-forest-500" />
-              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Evacuation Directives</h3>
+              <Navigation className="w-5 h-5 text-forest-500" />
+              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">{t('evacDirectives')}</h3>
             </div>
             <div className="space-y-3 text-xs text-gray-500 dark:text-gray-400 font-medium">
               <div className="flex justify-between items-center py-2 border-b border-gray-150/40 dark:border-graphite-855/45">

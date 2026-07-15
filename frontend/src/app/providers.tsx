@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { API_URL, SOCKET_URL } from '../config';
 
 export type UserRole = 'Fan' | 'Operations' | 'Security' | 'Volunteer';
 
@@ -72,6 +73,189 @@ interface UploadHistoryItem {
   aiInsights?: string;
 }
 
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    // Navigation Sidebar
+    overview: 'Overview',
+    operations: 'Operations Center',
+    crowd: 'Crowd Intelligence',
+    navigation: 'Navigation Center',
+    assistant: 'AI Assistant',
+    upload: 'Upload Center',
+    emergency: 'Emergency Center',
+    accessibility: 'Accessibility Center',
+    sustainability: 'Sustainability',
+    reports: 'Reports',
+    settings: 'Settings',
+
+    // Core Dashboard Layout
+    title: 'Stadium Operations Command',
+    liveSync: 'Live Sync Active',
+    disconnect: 'Disconnected',
+    signOut: 'Sign Out',
+    roleLabel: 'Role',
+
+    // Accessibility Center
+    escortRequest: 'Request Escort Assistance',
+    facilityStatus: 'Facility Status Monitoring',
+    languageAssistance: 'Language Vocal Assistance',
+    escortProfile: 'Escort Support Profile',
+    seatingSection: 'Target Sector / Seating Section',
+    dispatchButton: 'Request Escort Support',
+    activeLabel: 'Active',
+
+    // Emergency Center
+    riskIndex: 'Stadium Risk Index',
+    severeIncidents: 'Severe Incidents',
+    respondersDispatched: 'Responders Dispatched',
+    paScriptGen: 'Megaphone Alert PA Script Generator',
+    coreDispatch: 'Core Dispatch Lines',
+    evacDirectives: 'Evacuation Directives',
+
+    // Operations Center
+    activeTickets: 'Active Command Tickets',
+    closedArchives: 'Closed Archives',
+    staffRoster: 'Active Staff Roster',
+    decisionSupport: 'Active Decision Support',
+    suggestedMitigation: 'Suggested Mitigation Workflows'
+  },
+  es: {
+    // Navigation Sidebar
+    overview: 'Resumen',
+    operations: 'Centro de Operaciones',
+    crowd: 'Inteligencia de Multitudes',
+    navigation: 'Centro de Navegación',
+    assistant: 'Asistente de IA',
+    upload: 'Centro de Carga',
+    emergency: 'Centro de Emergencia',
+    accessibility: 'Centro de Accesibilidad',
+    sustainability: 'Sostenibilidad',
+    reports: 'Informes',
+    settings: 'Configuración',
+
+    // Core Dashboard Layout
+    title: 'Comando de Operaciones del Estadio',
+    liveSync: 'Sincronización en Vivo Activa',
+    disconnect: 'Desconectado',
+    signOut: 'Cerrar Sesión',
+    roleLabel: 'Rol',
+
+    // Accessibility Center
+    escortRequest: 'Solicitar Asistencia de Escolta',
+    facilityStatus: 'Monitoreo de Estado de Instalaciones',
+    languageAssistance: 'Asistencia Vocal de Idiomas',
+    escortProfile: 'Perfil de Soporte de Escolta',
+    seatingSection: 'Sector de Destino / Sección de Asiento',
+    dispatchButton: 'Solicitar Asistencia Rápida',
+    activeLabel: 'Activo',
+
+    // Emergency Center
+    riskIndex: 'Índice de Riesgo del Estadio',
+    severeIncidents: 'Incidentes Graves',
+    respondersDispatched: 'Socorristas Despachados',
+    paScriptGen: 'Generador de Guiones PA Megáfono',
+    coreDispatch: 'Líneas de Despacho Central',
+    evacDirectives: 'Directivas de Evacuación',
+
+    // Operations Center
+    activeTickets: 'Tickets de Comando Activos',
+    closedArchives: 'Archivos Cerrados',
+    staffRoster: 'Lista de Personal Activa',
+    decisionSupport: 'Soporte de Decisión Activo',
+    suggestedMitigation: 'Flujos de Mitigación Sugeridos'
+  },
+  ar: {
+    // Navigation Sidebar
+    overview: 'نظرة عامة',
+    operations: 'مركز العمليات',
+    crowd: 'استخبارات الحشود',
+    navigation: 'مركز الملاحة',
+    assistant: 'مساعد الذكاء الاصطناعي',
+    upload: 'مركز التحميل',
+    emergency: 'مركز الطوارئ',
+    accessibility: 'مركز إمكانية الوصول',
+    sustainability: 'الاستدامة',
+    reports: 'التقارير',
+    settings: 'الإعدادات',
+
+    // Core Dashboard Layout
+    title: 'قيادة عمليات الاستاد',
+    liveSync: 'مزامنة مباشرة نشطة',
+    disconnect: 'غير متصل',
+    signOut: 'تسجيل الخروج',
+    roleLabel: 'الدور',
+
+    // Accessibility Center
+    escortRequest: 'طلب مساعدة مرافق',
+    facilityStatus: 'مراقبة حالة المرافق',
+    languageAssistance: 'مساعدة اللغات الصوتية',
+    escortProfile: 'ملف تعريف دعم المرافق',
+    seatingSection: 'القطاع المستهدف / قسم المقاعد',
+    dispatchButton: 'طلب مساعدة سريعة',
+    activeLabel: 'نشط',
+
+    // Emergency Center
+    riskIndex: 'مؤشر مخاطر الاستاد',
+    severeIncidents: 'الحوادث الخطيرة',
+    respondersDispatched: 'تم إرسال المستجيبين',
+    paScriptGen: 'مولد نصوص إنذار مكبر الصوت',
+    coreDispatch: 'خطوط الإرسال الأساسية',
+    evacDirectives: 'توجيهات الإخلاء',
+
+    // Operations Center
+    activeTickets: 'تذاكر القيادة النشطة',
+    closedArchives: 'الأرشيف المغلق',
+    staffRoster: 'قائمة الموظفين النشطين',
+    decisionSupport: 'دعم القرار النشط',
+    suggestedMitigation: 'سير عمل التخفيف المقترح'
+  },
+  fr: {
+    // Navigation Sidebar
+    overview: 'Aperçu',
+    operations: 'Centre d’Opérations',
+    crowd: 'Intelligence des Foules',
+    navigation: 'Centre de Navegation',
+    assistant: 'Assistant IA',
+    upload: 'Centre de Téléchargement',
+    emergency: 'Centre d’Urgence',
+    accessibility: 'Centre d’Accessibilité',
+    sustainability: 'Durabilité',
+    reports: 'Rapports',
+    settings: 'Paramètres',
+
+    // Core Dashboard Layout
+    title: 'Commandement des Opérations du Stade',
+    liveSync: 'Synchronisation Active',
+    disconnect: 'Déconnecté',
+    signOut: 'Déconnexion',
+    roleLabel: 'Rôle',
+
+    // Accessibility Center
+    escortRequest: 'Demander Assistance d’Accompagnement',
+    facilityStatus: 'Surveillance de l’État des Installations',
+    languageAssistance: 'Assistance Vocale Multilingue',
+    escortProfile: 'Profil d’Assistance d’Accompagnement',
+    seatingSection: 'Secteur Cible / Section de Sièges',
+    dispatchButton: 'Demander Assistance Rapide',
+    activeLabel: 'Actif',
+
+    // Emergency Center
+    riskIndex: 'Indice de Risque du Stade',
+    severeIncidents: 'Incidents Graves',
+    respondersDispatched: 'Secouristes Déployés',
+    paScriptGen: 'Générateur de Scripts PA Mégaphone',
+    coreDispatch: 'Lignes de Dispatch de Base',
+    evacDirectives: 'Directives d’Évacuation',
+
+    // Operations Center
+    activeTickets: 'Tickets de Commandement Actifs',
+    closedArchives: 'Archives Clôturées',
+    staffRoster: 'Liste du Personnel Actif',
+    decisionSupport: 'Aide à la Décision Active',
+    suggestedMitigation: 'Flux de Mitigation Suggérés'
+  }
+};
+
 interface AppContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
@@ -94,6 +278,9 @@ interface AppContextType {
     firebase: string;
     googleMaps: string;
   };
+  language: 'en' | 'es' | 'ar' | 'fr';
+  setLanguage: (lang: 'en' | 'es' | 'ar' | 'fr') => void;
+  t: (key: string) => string;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -104,6 +291,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isConnected, setIsConnected] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [language, setLanguage] = useState<'en' | 'es' | 'ar' | 'fr'>('en');
 
   // State caches
   const [matches, setMatches] = useState<Match[]>([]);
@@ -143,6 +331,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     googleMaps: 'SIMULATED'
   });
 
+  const t = (key: string): string => {
+    const dict = translations[language] || translations['en'];
+    return dict[key] || key;
+  };
+
   // Toggle Theme helper
   const toggleTheme = () => {
     setTheme((prev) => {
@@ -166,7 +359,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Fetch initial REST data
   const fetchData = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/dashboard/overview');
+      const res = await fetch(`${API_URL}/api/dashboard/overview`);
       if (res.ok) {
         const data = await res.json();
         setMatches(data.matches);
@@ -180,7 +373,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setApiStatus(data.stats.apiStatus);
         }
       }
-      const historyRes = await fetch('http://localhost:3001/api/upload-history');
+      const historyRes = await fetch(`${API_URL}/api/upload-history`);
       if (historyRes.ok) {
         const historyData = await historyRes.json();
         setUploadHistory(historyData);
@@ -198,7 +391,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     fetchData();
 
-    const socketUrl = 'http://localhost:3001';
+    const socketUrl = SOCKET_URL;
     const s = io(socketUrl, {
       transports: ['websocket'],
       autoConnect: true
@@ -211,6 +404,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     s.on('disconnect', () => {
+      setIsConnected(true); // Treat reconnects gracefully
       setIsConnected(false);
       console.log('Disconnected from VenueOS Socket Engine.');
     });
@@ -231,12 +425,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     s.on('sustainability-updated', (data: Sustainability) => {
       setSustainability(data);
-      addNotification('Power grid and sustainability metrics updated.');
+      // Suppress logging alerts for telemetry simulation fluctuations to prevent log spams
     });
 
     s.on('crowd-updated', (data: Crowd) => {
       setCrowd(data);
-      addNotification('Gate queue occupancy forecasts recalculated.');
+      // Suppress logging alerts for telemetry simulation fluctuations to prevent log spams
     });
 
     s.on('upload-status', (data: UploadHistoryItem) => {
@@ -249,19 +443,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return [data, ...prev];
       });
-      if (data.status === 'SUCCESS') {
-        addNotification(`File "${data.fileName}" processed successfully.`);
-      } else if (data.status === 'ERROR') {
-        addNotification(`File "${data.fileName}" failed processing.`);
-      }
+      addNotification(`File upload status synchronized: ${data.fileName} (${data.status}).`);
     });
 
-      s.on('weather-updated', (data: any) => {
-        setWeather(data);
-        addNotification(`Local stadium weather updated: ${data.temp}°C.`);
-      });
-
-      setSocket(s);
+    setSocket(s);
 
     return () => {
       s.disconnect();
@@ -298,7 +483,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notifications,
         clearNotifications,
         weather,
-        apiStatus
+        apiStatus,
+        language,
+        setLanguage,
+        t
       }}
     >
       {children}

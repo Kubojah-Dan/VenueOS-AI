@@ -1505,10 +1505,10 @@
     }
   ],
   "sustainability": {
-    "liveEnergyUsageKw": 1628,
+    "liveEnergyUsageKw": 1361,
     "peakEnergyUsageKw": 2200,
-    "solarContributionPercent": 76.5,
-    "waterConsumptionLiters": 145562,
+    "solarContributionPercent": 58.5,
+    "waterConsumptionLiters": 146881,
     "reclaimedWaterPercent": 42,
     "carbonEmissionKg": 4120,
     "carbonOffsetsKg": 1450,
@@ -1554,32 +1554,32 @@
     ]
   },
   "crowd": {
-    "totalOccupancy": 78972,
+    "totalOccupancy": 78987,
     "maxCapacity": 80000,
     "occupancyPercentage": 98.7,
-    "crowdFlowRatePpm": 173,
+    "crowdFlowRatePpm": 275,
     "sectors": [
       {
         "name": "Sector North",
-        "occupancy": 19217,
+        "occupancy": 19259,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector East",
-        "occupancy": 19080,
+        "occupancy": 19450,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector South",
-        "occupancy": 19375,
+        "occupancy": 19421,
         "capacity": 20000,
         "status": "CRITICAL"
       },
       {
         "name": "Sector West",
-        "occupancy": 18933,
+        "occupancy": 19025,
         "capacity": 20000,
         "status": "CRITICAL"
       }
@@ -1587,25 +1587,25 @@
     "gates": [
       {
         "name": "Gate A (North)",
-        "queueTimeMin": 40,
+        "queueTimeMin": 35,
         "flowRatePpm": 90,
         "status": "CRITICAL"
       },
       {
         "name": "Gate B (East)",
-        "queueTimeMin": 57,
+        "queueTimeMin": 56,
         "flowRatePpm": 50,
         "status": "CRITICAL"
       },
       {
         "name": "Gate C (South)",
-        "queueTimeMin": 50,
+        "queueTimeMin": 51,
         "flowRatePpm": 110,
         "status": "CRITICAL"
       },
       {
         "name": "Gate D (West)",
-        "queueTimeMin": 8,
+        "queueTimeMin": 11,
         "flowRatePpm": 80,
         "status": "NORMAL"
       }

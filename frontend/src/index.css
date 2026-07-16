@@ -205,3 +205,27 @@ button, a, [role="button"] {
   color: #34d399;
   border-left: 3px solid #34d399;
 }
+
+/* ── Accessibility Overrides ────────────────────────────────────────── */
+.high-contrast {
+  --border-default: rgba(15, 23, 42, 0.85) !important;
+  --text-secondary: #0f172a !important;
+  --text-muted: #1e293b !important;
+  border-width: 1.5px !important;
+}
+
+.dark.high-contrast {
+  --border-default: #ffffff !important;
+  --text-secondary: #f1f5f9 !important;
+  --text-muted: #e2e8f0 !important;
+  border-width: 1.5px !important;
+}
+
+.font-size-medium {
+  font-size: 110% !important;
+}
+
+.font-size-large {
+  font-size: 120% !important;
+}
+

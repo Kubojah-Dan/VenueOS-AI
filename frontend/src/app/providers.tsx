@@ -269,6 +269,10 @@ interface AppContextType {
   setRole: (role: UserRole) => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
+  highContrast: boolean;
+  toggleHighContrast: () => void;
+  fontSize: 'standard' | 'medium' | 'large';
+  changeFontSize: (sz: 'standard' | 'medium' | 'large') => void;
   isConnected: boolean;
   matches: Match[];
   incidents: Incident[];
@@ -342,6 +346,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const t = (key: string): string => {
     const dict = translations[language] || translations['en'];
     return dict[key] || key;
+  };
+
+  const [highContrast, setHighContrast] = useState(false);
+  const [fontSize, setFontSize] = useState<'standard' | 'medium' | 'large'>('standard');
+
+  // Toggle High Contrast helper
+  const toggleHighContrast = () => {
+    setHighContrast((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add('high-contrast');
+      } else {
+        document.documentElement.classList.remove('high-contrast');
+      }
+      return next;
+    });
+  };
+
+  // Change Font Size helper
+  const changeFontSize = (sz: 'standard' | 'medium' | 'large') => {
+    setFontSize(sz);
+    document.documentElement.classList.remove('font-size-standard', 'font-size-medium', 'font-size-large');
+    document.documentElement.classList.add(`font-size-${sz}`);
   };
 
   // Toggle Theme helper
@@ -480,6 +507,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setRole,
         theme,
         toggleTheme,
+        highContrast,
+        toggleHighContrast,
+        fontSize,
+        changeFontSize,
         isConnected,
         matches,
         incidents,

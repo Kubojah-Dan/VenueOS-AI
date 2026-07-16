@@ -3,7 +3,7 @@ import { useApp } from '../../app/providers';
 import { Settings as SetIcon, Shield, Bell, Key, Moon, Sun, Laptop } from 'lucide-react';
 
 export const Settings: React.FC = () => {
-  const { theme, toggleTheme, apiStatus } = useApp();
+  const { theme, toggleTheme, apiStatus, highContrast, toggleHighContrast, fontSize, changeFontSize } = useApp();
   
   const [operatorName, setOperatorName] = useState('Shifty Director');
   const [operatorId, setOperatorId] = useState('OPS-WC2026-09');
@@ -121,7 +121,6 @@ export const Settings: React.FC = () => {
             </p>
           </div>
 
-
         </div>
 
         {/* NOTIFICATIONS & THEME SETTINGS */}
@@ -155,6 +154,43 @@ export const Settings: React.FC = () => {
                 <Moon className="w-4 h-4" />
                 <span>Dark Mode</span>
               </button>
+            </div>
+          </div>
+
+          {/* ACCESSIBILITY SETTINGS */}
+          <div className="bg-white dark:bg-graphite-900 border border-gray-150 dark:border-graphite-800 rounded-xl p-5 shadow-premium space-y-4">
+            <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Accessibility Controls</h3>
+            
+            <div className="space-y-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+              <div className="flex justify-between items-center">
+                <span>High Contrast Under Sunlight</span>
+                <input
+                  type="checkbox"
+                  checked={highContrast}
+                  onChange={toggleHighContrast}
+                  className="rounded border-gray-300 text-forest-500 focus:ring-forest-500 w-4 h-4"
+                  aria-label="Toggle high contrast visibility mode"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <span className="block mb-1">Text Scaling Options</span>
+                <div className="flex space-x-1.5">
+                  {(['standard', 'medium', 'large'] as const).map((sz) => (
+                    <button
+                      key={sz}
+                      onClick={() => changeFontSize(sz)}
+                      className={`flex-1 py-1.5 px-2 rounded-lg border text-[10px] font-bold uppercase transition-all ${
+                        fontSize === sz
+                          ? 'bg-forest-500 text-white border-forest-500'
+                          : 'bg-white dark:bg-graphite-950 border-gray-200 dark:border-graphite-850 text-gray-500'
+                      }`}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 

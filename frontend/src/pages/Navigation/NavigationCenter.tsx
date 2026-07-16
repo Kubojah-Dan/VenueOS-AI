@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { MapPin, Navigation as NavIcon, Train, Bus, Info, Check, Eye } from 'lucide-react';
+import { API_URL } from '../../config';
+import { MapPin, Navigation as NavIcon, Train, Bus, Info, Check, Sparkles, Ticket, Accessibility } from 'lucide-react';
 
 interface RouteItem {
   id: string;
@@ -14,6 +15,10 @@ interface RouteItem {
 
 export const NavigationCenter: React.FC = () => {
   const [activeRouteId, setActiveRouteId] = useState<string>('r1');
+  const [ticketInput, setTicketInput] = useState<string>('GATE-A-SEC102-STANDARD');
+  const [wayfindingDetails, setWayfindingDetails] = useState<string>('');
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+
   const mapRef = useRef<L.Map | null>(null);
   const pathLayerRef = useRef<L.Polyline | null>(null);
   const startMarkerRef = useRef<L.CircleMarker | null>(null);
@@ -106,7 +111,7 @@ export const NavigationCenter: React.FC = () => {
     const map = L.map('map-navigation', { scrollWheelZoom: false }).setView([25.4208, 51.4886], 15);
     mapRef.current = map;
 
-    // Dark-adapted Map tiles using CartoDB Dark Matter for Dark mode compatibility
+    // Voyager tile overlays
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
     }).addTo(map);
@@ -189,6 +194,53 @@ export const NavigationCenter: React.FC = () => {
 
   }, [activeRouteId]);
 
+  // Request turn-by-turn wayfinding directions via GenAI
+  const handleCalculateWayfinding = async () => {
+    setIsGenerating(true);
+    setWayfindingDetails('CALCULATING TURN-BY-TURN PATHING VIA AI...');
+
+    const isAccessible = ticketInput.includes('ACCESSIBLE');
+    const selectedGate = ticketInput.includes('GATE-C') ? 'Gate C' : ticketInput.includes('GATE-D') ? 'Gate D' : 'Gate A';
+    
+    // Auto-update map display matching the ticket gate
+    if (selectedGate === 'Gate C') {
+      setActiveRouteId('r3');
+    } else if (selectedGate === 'Gate D' || isAccessible) {
+      setActiveRouteId('r4'); // Accessible route
+    } else {
+      setActiveRouteId('r1');
+    }
+
+    try {
+      const query = `You are a helpful Stadium Wayfinding Guide at the FIFA World Cup 2026.
+Explain the step-by-step turn-by-turn route to reach this seat: [${ticketInput}].
+If the ticket contains ACCESSIBLE, explicitly state the step-free accessible route highlighting ADA elevators, ramps, and accessible concourse toilets.
+Otherwise, give the standard concourse walking directions.
+Keep the directions clear, concise, under 65 words, and formatted as markdown bullet points. Do not include introductory text.`;
+
+      const res = await fetch(`${API_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, role: 'Fan' })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setWayfindingDetails(data.response.trim());
+      } else {
+        throw new Error('API failed');
+      }
+    } catch (err) {
+      if (isAccessible) {
+        setWayfindingDetails(`* Head towards the West Gate D entrance.\n* Use the dedicated wheelchair-accessible ADA ramp at the entry portal.\n* Take Elevator 4 to Concourse Level 1.\n* Follow Section 102 indicators to the step-free companion seating row.`);
+      } else {
+        setWayfindingDetails(`* Enter via Gate A (North Entrance).\n* Climb Escalator 3 to Level 2 Concourse.\n* Head clockwise past Food Court A.\n* Access Section 102 entry portal to find Row 5, Seat 14.`);
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="space-y-6 font-sans">
       
@@ -196,7 +248,7 @@ export const NavigationCenter: React.FC = () => {
       <div className="flex justify-between items-center premium-card p-5">
         <div>
           <h2 className="text-base font-bold text-gray-850 dark:text-white">Transit Logistics & Interactive Wayfinding Map</h2>
-          <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold">Shuttle dispatch timers, parking inventory tracking, and dynamic interactive routing</p>
+          <p className="text-xs text-gray-400 dark:text-gray-550 font-semibold">Shuttle dispatch timers, parking inventory tracking, and dynamic interactive routing</p>
         </div>
       </div>
 
@@ -275,6 +327,76 @@ export const NavigationCenter: React.FC = () => {
             </div>
           </div>
 
+        </div>
+
+      </div>
+
+      {/* AI TICKET WAYFINDING SCANNER & ACCESSIBLE ROUTING */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* TICKET SELECTOR */}
+        <div className="premium-card p-5 space-y-4 lg:col-span-2">
+          <div className="flex items-center space-x-2">
+            <Ticket className="w-5 h-5 text-forest-500" />
+            <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>AI Ticket Wayfinding Scanner</h3>
+          </div>
+          <p className="text-[10px] text-gray-400 font-semibold">
+            Simulate a ticket scan or enter locator strings to extract turn-by-turn routing (supports WCAG ADA step-free wheelchair routing configurations).
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[9px] font-bold text-gray-450 uppercase mb-1">Select Example Ticket Locator</label>
+              <select
+                value={ticketInput}
+                onChange={(e) => setTicketInput(e.target.value)}
+                className="w-full bg-white dark:bg-graphite-950 border border-gray-250 dark:border-graphite-850 p-2.5 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-forest-500"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                <option value="GATE-A-SEC102-ROW5-STANDARD">Gate A (North) - Sect 102, Row 5 (Standard)</option>
+                <option value="GATE-C-SEC310-ROW22-STANDARD">Gate C (South) - Sect 310, Row 22 (Standard)</option>
+                <option value="GATE-D-SEC102-WHEELCHAIR-ACCESSIBLE">Gate D (West) - Sect 102, ADA Companion (Step-Free Accessible)</option>
+              </select>
+            </div>
+            
+            <div className="flex items-end">
+              <button
+                onClick={handleCalculateWayfinding}
+                disabled={isGenerating}
+                className="w-full flex items-center justify-center space-x-1.5 py-2.5 bg-forest-500 hover:bg-forest-600 text-white rounded-lg text-xs font-semibold shadow-premium transition-all disabled:opacity-50"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>{isGenerating ? 'Calculating pathing...' : 'Calculate AI Wayfinding'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* WAYFINDING DIRECTIONS OUTPUT */}
+        <div className="premium-card p-5 space-y-3" style={{ background: 'var(--bg-panel)' }}>
+          <div className="flex items-center space-x-2">
+            {ticketInput.includes('ACCESSIBLE') ? (
+              <Accessibility className="w-5 h-5 text-emerald-500" />
+            ) : (
+              <NavIcon className="w-5 h-5 text-blue-500 animate-pulse" />
+            )}
+            <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>Turn-by-Turn Wayfinding</h3>
+          </div>
+          
+          <div className="text-[11px] leading-relaxed font-semibold space-y-2 min-h-[96px]">
+            {wayfindingDetails ? (
+              <div className="space-y-1.5" style={{ color: 'var(--text-secondary)' }}>
+                {wayfindingDetails.split('\n').map((line, idx) => (
+                  <div key={idx} className="flex items-start space-x-2">
+                    <span className="text-emerald-500 shrink-0">•</span>
+                    <span>{line.replace(/^\*\s*/, '')}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 font-semibold">Select a ticket locator and click "Calculate AI Wayfinding" to trigger routing instructions.</p>
+            )}
+          </div>
         </div>
 
       </div>

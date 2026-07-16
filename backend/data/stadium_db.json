@@ -1419,12 +1419,12 @@
       "matchNumber": 102,
       "homeTeam": "England",
       "awayTeam": "Argentina",
-      "homeScore": 0,
-      "awayScore": 0,
-      "status": "SCHEDULED",
-      "minute": 0,
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": "FINISHED",
+      "minute": 90,
       "stadium": "Mercedes-Benz Stadium (Atlanta Stadium)",
-      "attendance": 0,
+      "attendance": 78912,
       "group": "SF",
       "dateTime": "2026-07-15T19:00:00.000Z"
     },
@@ -1505,10 +1505,10 @@
     }
   ],
   "sustainability": {
-    "liveEnergyUsageKw": 1081,
+    "liveEnergyUsageKw": 1429,
     "peakEnergyUsageKw": 2200,
-    "solarContributionPercent": 60.5,
-    "waterConsumptionLiters": 148514,
+    "solarContributionPercent": 62,
+    "waterConsumptionLiters": 312919,
     "reclaimedWaterPercent": 42,
     "carbonEmissionKg": 4120,
     "carbonOffsetsKg": 1450,
@@ -1554,94 +1554,91 @@
     ]
   },
   "crowd": {
-    "totalOccupancy": 79166,
-    "maxCapacity": 80000,
-    "occupancyPercentage": 99,
-    "crowdFlowRatePpm": 357,
-    "sectors": [
-      {
-        "name": "Sector North",
-        "occupancy": 19028,
-        "capacity": 20000,
-        "status": "CRITICAL"
-      },
-      {
-        "name": "Sector East",
-        "occupancy": 19343,
-        "capacity": 20000,
-        "status": "CRITICAL"
-      },
-      {
-        "name": "Sector South",
-        "occupancy": 19515,
-        "capacity": 20000,
-        "status": "CRITICAL"
-      },
-      {
-        "name": "Sector West",
-        "occupancy": 19211,
-        "capacity": 20000,
-        "status": "CRITICAL"
-      }
-    ],
+    "crowdFlowRatePpm": 573,
     "gates": [
       {
-        "name": "Gate A (North)",
-        "queueTimeMin": 39,
         "flowRatePpm": 90,
-        "status": "CRITICAL"
+        "name": "Gate A (North)",
+        "queueTimeMin": 4,
+        "status": "NORMAL"
       },
       {
-        "name": "Gate B (East)",
-        "queueTimeMin": 57,
         "flowRatePpm": 50,
-        "status": "CRITICAL"
+        "name": "Gate B (East)",
+        "queueTimeMin": 30,
+        "status": "SLOW"
       },
       {
-        "name": "Gate C (South)",
-        "queueTimeMin": 34,
         "flowRatePpm": 110,
-        "status": "CRITICAL"
+        "name": "Gate C (South)",
+        "queueTimeMin": 11,
+        "status": "NORMAL"
       },
       {
-        "name": "Gate D (West)",
-        "queueTimeMin": 32,
         "flowRatePpm": 80,
+        "name": "Gate D (West)",
+        "queueTimeMin": 35,
         "status": "CRITICAL"
       }
     ],
+    "maxCapacity": 80000,
+    "occupancyPercentage": 96,
     "predictedOccupancy": [
       {
-        "time": "19:00",
         "actual": 68000,
-        "predicted": 68000
+        "predicted": 68000,
+        "time": "19:00"
       },
       {
-        "time": "19:30",
         "actual": 75000,
-        "predicted": 74500
+        "predicted": 74500,
+        "time": "19:30"
       },
       {
-        "time": "20:00",
         "actual": 78912,
-        "predicted": 78500
+        "predicted": 78500,
+        "time": "20:00"
       },
       {
-        "time": "20:30",
-        "actual": null,
-        "predicted": 79500
+        "predicted": 79500,
+        "time": "20:30"
       },
       {
-        "time": "21:00",
-        "actual": null,
-        "predicted": 80000
+        "predicted": 80000,
+        "time": "21:00"
       },
       {
-        "time": "21:30",
-        "actual": null,
-        "predicted": 75000
+        "predicted": 75000,
+        "time": "21:30"
       }
-    ]
+    ],
+    "sectors": [
+      {
+        "capacity": 20000,
+        "name": "Sector North",
+        "occupancy": 18055,
+        "status": "CRITICAL"
+      },
+      {
+        "capacity": 20000,
+        "name": "Sector East",
+        "occupancy": 18411,
+        "status": "CRITICAL"
+      },
+      {
+        "capacity": 20000,
+        "name": "Sector South",
+        "occupancy": 18040,
+        "status": "CRITICAL"
+      },
+      {
+        "capacity": 20000,
+        "name": "Sector West",
+        "occupancy": 19143,
+        "status": "CRITICAL"
+      }
+    ],
+    "totalOccupancy": 76830
   },
   "uploadHistory": []
 }

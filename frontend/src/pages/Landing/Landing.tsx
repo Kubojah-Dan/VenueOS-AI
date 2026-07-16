@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import {
   Shield,
   Activity,
@@ -9,20 +9,114 @@ import {
   ArrowRight,
   Zap,
   Globe,
-  Database,
   Terminal,
-  Sun,
-  Flame,
-  UserPlus
+  Leaf,
+  MessageSquare,
+  Upload,
+  ChevronRight,
 } from 'lucide-react';
 
+// ── Animated Counter ──────────────────────────────────────────────────────
+const AnimatedCounter = ({ end, suffix = '', decimals = 0 }: { end: number; suffix?: string; decimals?: number }) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!inView) return;
+    let start = 0;
+    const duration = 1800;
+    const step = 16;
+    const increment = end / (duration / step);
+    const timer = setInterval(() => {
+      start = Math.min(start + increment, end);
+      setCount(start);
+      if (start >= end) clearInterval(timer);
+    }, step);
+    return () => clearInterval(timer);
+  }, [inView, end]);
+
+  return (
+    <span ref={ref}>
+      {decimals > 0 ? count.toFixed(decimals) : Math.floor(count).toLocaleString()}{suffix}
+    </span>
+  );
+};
+
+// ── Telemetry log colors ───────────────────────────────────────────────────
+const LOG_COLORS: Record<string, string> = {
+  SYSTEM:         '#cebfaa',
+  SENSOR:         '#60a5fa',
+  API:            '#2dd4bf',
+  AI:             '#c084fc',
+  INCIDENT:       '#f87171',
+  SUSTAINABILITY: '#34d399',
+  SECURITY:       '#fb923c',
+  CROWD:          '#fbbf24',
+  DATABASE:       '#a3e635',
+};
+
+const getLogColor = (line: string): string => {
+  for (const key of Object.keys(LOG_COLORS)) {
+    if (line.startsWith(key)) return LOG_COLORS[key];
+  }
+  return '#8f7a5e';
+};
+
+// ── Feature cards data ────────────────────────────────────────────────────
+const features = [
+  {
+    icon: Users,
+    color: '#10b981',
+    colorBg: 'rgba(16,185,129,0.12)',
+    title: 'Crowd Telemetry & Routing',
+    desc: 'Sensing gate queue thresholds and predicting transit bottlenecks. Updates wayfinding maps dynamically to optimize flow velocities across all sectors.'
+  },
+  {
+    icon: Shield,
+    color: '#f59e0b',
+    colorBg: 'rgba(245,158,11,0.12)',
+    title: 'Incident Dispatch Center',
+    desc: 'Log medical, security, or facilities dispatches. Dynamic maps track incident zones and output AI mitigation scripts instantly.'
+  },
+  {
+    icon: Zap,
+    color: '#14b8a6',
+    colorBg: 'rgba(20,184,166,0.12)',
+    title: 'Smart Grid & Sustainability',
+    desc: 'Real-time energy monitoring, solar contribution tracking, carbon offsets, and water consumption analytics in one dashboard.'
+  },
+  {
+    icon: MessageSquare,
+    color: '#8b5cf6',
+    colorBg: 'rgba(139,92,246,0.12)',
+    title: 'AI Command Assistant',
+    desc: 'Context-aware Groq-powered LLM agent answers operational queries, suggests crowd routing, and drafts PA announcements.'
+  },
+  {
+    icon: Map,
+    color: '#60a5fa',
+    colorBg: 'rgba(96,165,250,0.12)',
+    title: 'Navigation & Wayfinding',
+    desc: 'Interactive Leaflet maps with stadium sectors, accessibility routes, and live gate congestion overlays.'
+  },
+  {
+    icon: Upload,
+    color: '#fb923c',
+    colorBg: 'rgba(251,146,60,0.12)',
+    title: 'Data Ingestion Engine',
+    desc: 'Upload CSV, Excel, or JSON datasets. All dashboards, AI suggestions, and reports sync in seconds via Socket.IO.'
+  },
+];
+
+// ── Main Component ────────────────────────────────────────────────────────
 export const Landing: React.FC = () => {
-  // Simulated realtime log terminal feed
   const [logs, setLogs] = useState<string[]>([
     'SYSTEM [09:12:01]: Initializing VenueOS telemetry ingestion node...',
     'SENSOR [09:12:02]: Calibrating Gate A-D ingress optical sensors...',
-    'API [09:12:04]: OpenWeatherMap telemetry connected - Doha 32°C Clear',
-    'DATABASE [09:12:05]: Firestore collections successfully bound.'
+    'API [09:12:04]: OpenWeatherMap telemetry connected — Doha 39°C Clear',
+    'DATABASE [09:12:05]: Firebase collections successfully bound.',
+    'CROWD [09:12:08]: Gate A flow rate nominal (320 ppm).',
   ]);
 
   useEffect(() => {
@@ -31,256 +125,352 @@ export const Landing: React.FC = () => {
       'AI [09:12:22]: Re-routing queue models via North Walkways',
       'SUSTAINABILITY [09:12:35]: Solar contribution peaked at 38.6%',
       'INCIDENT [09:12:48]: Category: Medical reported at Gate C Concourse',
-      'API [09:13:02]: Football-Data match index synchronized successfully',
-      'SECURITY [09:13:14]: Volunteer dispatched to Gate C - ETA 2.5m',
-      'AI [09:13:20]: Broadcaster trigger: "P.A. Announcement Queue Re-route"'
+      'API [09:13:02]: Football-Data match index synchronized — 104 fixtures',
+      'SECURITY [09:13:14]: Volunteer dispatched to Gate C — ETA 2.5m',
+      'AI [09:13:20]: P.A. Announcement drafted: "Queue Re-route North"',
+      'SENSOR [09:13:31]: Sector East occupancy: 91.3% — CONGESTED alert',
     ];
-
     let cursor = 0;
     const timer = setInterval(() => {
-      setLogs((prev) => [...prev.slice(-5), events[cursor]]);
+      setLogs(prev => [...prev.slice(-6), events[cursor]]);
       cursor = (cursor + 1) % events.length;
-    }, 4500);
-
+    }, 3800);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#070b0d] text-gray-100 flex flex-col font-sans relative overflow-hidden">
-      
-      {/* Dynamic Animated Stadium Background Image (Ken Burns movement) */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-[0.045] dark:opacity-[0.06] z-0 animate-slow-zoom"
-        style={{ 
-          backgroundImage: "url('/stadium_bg.png'), url('/stadium_bg.jpg'), url('/stadium.jpg'), url('/bg.jpg')"
+    <div
+      className="min-h-screen flex flex-col font-sans relative overflow-hidden"
+      style={{ background: '#0e0a06', color: '#f3e4c8' }}
+    >
+      {/* ── Background layers ─────────────────────────────────────────── */}
+      <div
+        className="absolute inset-0 bg-cover bg-center pointer-events-none animate-slow-zoom z-0"
+        style={{
+          backgroundImage: "url('/stadium_bg.png'), url('/stadium_bg.jpg'), url('/stadium.jpg')",
+          opacity: 0.045,
         }}
       />
-      
-      {/* GLOWING AMBIENT GRADIENTS (Premium Vercel-style background glow) */}
-      <div className="absolute top-[-10%] left-[-20%] w-[60%] aspect-square rounded-full bg-forest-500/10 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] aspect-square rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none" />
-      
-      {/* GRID OVERLAY */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-20" />
+      {/* Warm amber glow top-left */}
+      <div className="absolute top-[-15%] left-[-15%] w-[55%] aspect-square rounded-full pointer-events-none z-0"
+        style={{ background: 'radial-gradient(circle, rgba(28,62,53,0.20) 0%, transparent 70%)' }} />
+      {/* Teal glow bottom-right */}
+      <div className="absolute bottom-[-10%] right-[-10%] w-[45%] aspect-square rounded-full pointer-events-none z-0"
+        style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)' }} />
+      {/* Grid overlay */}
+      <div className="absolute inset-0 pointer-events-none z-0 opacity-[0.07]"
+        style={{ backgroundImage: 'linear-gradient(to right, #b3924220 1px, transparent 1px), linear-gradient(to bottom, #b3924220 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
-      {/* NAVBAR */}
-      <header className="mx-4 md:mx-8 mt-4 mb-2 bg-[#070b0d]/75 backdrop-blur-md border border-gray-800/40 rounded-full shadow-premium flex items-center justify-between h-14 px-5 md:px-6 z-50 sticky top-4">
+      {/* ── NAVBAR ───────────────────────────────────────────────────────── */}
+      <header
+        className="sticky top-3 mx-3 sm:mx-6 mt-3 z-50 rounded-2xl border flex items-center justify-between px-4 sm:px-6 h-14"
+        style={{
+          background: 'rgba(14,10,6,0.82)',
+          backdropFilter: 'blur(16px)',
+          borderColor: 'rgba(179,146,66,0.20)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.40)',
+        }}
+      >
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center p-1 shadow-sm shrink-0">
-            <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-full h-full object-contain" />
+          <div className="w-8 h-8 rounded-full border flex items-center justify-center p-1 shrink-0"
+            style={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(179,146,66,0.20)' }}>
+            <img src="/logos/logo.png" alt="VenueOS AI" className="w-full h-full object-contain animate-spin-slow" />
           </div>
           <div>
-            <span className="text-xs font-black tracking-tight text-forest-400 block leading-none uppercase">VenueOS AI</span>
-            <span className="text-[9px] text-gray-500 font-bold tracking-wider uppercase">World Cup Console</span>
+            <span className="text-xs font-black tracking-tight text-emerald-400 block leading-none uppercase">VenueOS AI</span>
+            <span className="text-[9px] font-bold tracking-wider uppercase" style={{ color: '#8f7a5e' }}>World Cup 2026</span>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <Link
-            to="/login"
-            className="text-xs font-bold text-gray-400 hover:text-white transition-colors"
-          >
+        <nav className="flex items-center space-x-2 sm:space-x-4">
+          <a href="#features" className="hidden sm:inline text-xs font-semibold transition-colors" style={{ color: '#8f7a5e' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#f3e4c8')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#8f7a5e')}>
+            Features
+          </a>
+          <Link to="/login" className="text-xs font-semibold transition-colors" style={{ color: '#cebfaa' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#f3e4c8')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#cebfaa')}>
             Sign In
           </Link>
           <Link
             to="/dashboard/overview"
-            className="px-4 py-1.5 bg-forest-500 hover:bg-forest-600 text-white rounded-full text-xs font-bold shadow-lg shadow-forest-500/15 transition-all"
+            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg, #1c3e35, #0e1f1b)', border: '1px solid rgba(16,185,129,0.25)' }}
           >
-            Launch Console
+            <span>Launch Console</span>
+            <ChevronRight className="w-3.5 h-3.5" />
           </Link>
-        </div>
+        </nav>
       </header>
 
-      {/* HERO SECTION */}
-      <main className="flex-1 max-w-6xl mx-auto px-6 py-16 md:py-24 text-center z-10 space-y-12">
-        
-        {/* PROTOCOL HEADER */}
-        <motion.div 
+      {/* ── HERO ─────────────────────────────────────────────────────────── */}
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-14 sm:py-20 md:py-28 text-center z-10 space-y-10 sm:space-y-14">
+
+        {/* Badge */}
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center space-x-2 px-3 py-1 bg-forest-500/10 border border-forest-500/20 text-forest-400 rounded-full text-[10px] font-bold"
+          className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-[10px] font-bold border"
+          style={{ background: 'rgba(28,62,53,0.20)', borderColor: 'rgba(16,185,129,0.25)', color: '#34d399' }}
         >
-          <Globe className="w-3.5 h-3.5 animate-spin-slow text-forest-400" />
-          <span>FIFA WORLD CUP 2026 ACTIVE SECURITY SPECIFICATION</span>
+          <Globe className="w-3.5 h-3.5 animate-spin-slow" />
+          <span>FIFA WORLD CUP 2026 · ACTIVE SECURITY SPECIFICATION</span>
         </motion.div>
 
-        {/* HERO TITLE */}
-        <div className="space-y-4 max-w-4xl mx-auto">
-          <motion.h1 
-            initial={{ opacity: 0, y: 15 }}
+        {/* Headline */}
+        <div className="space-y-4 sm:space-y-5 max-w-4xl mx-auto">
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-7xl font-bold tracking-wide text-white leading-tight font-graffiti skew-x-[-6deg] select-none"
+            transition={{ duration: 0.65, delay: 0.1 }}
+            className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-wide leading-tight font-graffiti select-none"
+            style={{ color: '#f3e4c8' }}
           >
-            The Intelligent Operating System <br />
-            <span className="bg-gradient-to-r from-emerald-400 via-teal-350 to-emerald-300 bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(16,185,129,0.45)]">
-              for Smart Stadiums
+            The Intelligent<br />
+            <span style={{
+              background: 'linear-gradient(135deg, #34d399, #14b8a6, #10b981)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              filter: 'drop-shadow(0 0 20px rgba(16,185,129,0.35))',
+            }}>
+              Stadium OS
             </span>
           </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 15 }}
+          <motion.p
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto leading-relaxed font-medium"
+            transition={{ duration: 0.65, delay: 0.2 }}
+            className="text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-medium"
+            style={{ color: '#8f7a5e' }}
           >
-            An event-driven intelligence hub mapping crowd kinetics, automating medical dispatch logs, visualizing micro-grid solar consumption, and running context-aware AI support agents.
+            An event-driven intelligence hub mapping crowd kinetics, automating medical dispatch logs, visualizing micro-grid solar consumption, and running context-aware AI support agents — built for FIFA World Cup 2026.
           </motion.p>
         </div>
 
         {/* CTAs */}
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex items-center justify-center space-x-4"
+          transition={{ duration: 0.65, delay: 0.3 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3"
         >
           <Link
             to="/dashboard/overview"
-            className="flex items-center space-x-2 px-6 py-3 bg-forest-500 hover:bg-forest-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-forest-500/20 transition-all transform hover:-translate-y-0.5"
+            className="flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-bold text-white w-full sm:w-auto justify-center transition-all hover:-translate-y-0.5"
+            style={{ background: 'linear-gradient(135deg, #1c3e35, #10b981)', boxShadow: '0 8px 24px rgba(16,185,129,0.20)' }}
           >
             <span>Launch Operator Dashboard</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
           <a
             href="#features"
-            className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl text-sm font-semibold transition-all"
+            className="flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-semibold w-full sm:w-auto justify-center transition-all border hover:-translate-y-0.5"
+            style={{ borderColor: 'rgba(179,146,66,0.25)', color: '#cebfaa', background: 'rgba(179,146,66,0.06)' }}
           >
-            Operational Pillars
+            <span>Explore Features</span>
           </a>
         </motion.div>
 
-        {/* SHOWCASE PLATFORM MOCKUP AND LIVE STREAM */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
+        {/* ── HERO DEMO PANEL ───────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 35 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="grid grid-cols-1 lg:grid-cols-5 gap-6 max-w-5xl mx-auto pt-6 text-left"
+          transition={{ duration: 0.85, delay: 0.45 }}
+          className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 max-w-5xl mx-auto pt-4 text-left"
         >
-          {/* LEFT PANEL: VISUAL STADIUM CONSOLE */}
-          <div className="lg:col-span-3 border border-white/10 bg-[#0c1214] rounded-2xl p-4 shadow-2xl relative overflow-hidden flex flex-col space-y-4">
-            <div className="absolute inset-0 bg-gradient-to-tr from-forest-500/5 to-transparent pointer-events-none" />
-            
-            {/* Header console mock */}
-            <div className="flex justify-between items-center pb-2 border-b border-white/5 text-[9px] font-bold text-gray-500">
-              <div className="flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-gray-300">LUSAIL OPERATIONS CORE</span>
-              </div>
-              <span>SECURITY LEVEL: CLASS-A</span>
-            </div>
+          {/* Left: Console KPIs + mini map */}
+          <div
+            className="lg:col-span-3 rounded-2xl p-4 sm:p-5 flex flex-col space-y-4 border overflow-hidden relative"
+            style={{ background: '#0d0904', borderColor: 'rgba(179,146,66,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.50)' }}
+          >
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: 'linear-gradient(135deg, rgba(28,62,53,0.08) 0%, transparent 60%)' }} />
 
-            {/* Grid display inside console */}
-            <div className="grid grid-cols-3 gap-3 flex-1">
-              <div className="bg-[#11191c] border border-white/5 rounded-xl p-3 flex flex-col justify-between">
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">Total Occupancy</span>
-                <span className="text-xl font-bold text-forest-400 block mt-1">78,912</span>
-                <span className="text-[8px] text-emerald-500 font-semibold block">98.6% Capacity reached</span>
-              </div>
-              <div className="bg-[#11191c] border border-white/5 rounded-xl p-3 flex flex-col justify-between">
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">Security Dispatches</span>
-                <span className="text-xl font-bold text-amber-500 block mt-1">02 / Active</span>
-                <span className="text-[8px] text-gray-400 font-semibold block">Queue C & Food Court A</span>
-              </div>
-              <div className="bg-[#11191c] border border-white/5 rounded-xl p-3 flex flex-col justify-between">
-                <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider block">Renewable Power</span>
-                <span className="text-xl font-bold text-teal-400 block mt-1">38.6% Solar</span>
-                <span className="text-[8px] text-teal-500 font-semibold block">Grid feed backup ready</span>
-              </div>
-            </div>
-
-            {/* Simulated Map View mock */}
-            <div className="h-28 bg-[#11191c]/50 rounded-xl border border-white/5 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-radial-grid opacity-30" />
-              <div className="w-16 h-16 rounded-full border border-forest-500/20 bg-forest-500/5 animate-pulse flex items-center justify-center">
-                <div className="w-8 h-8 rounded-full border border-forest-500/40 bg-forest-500/10 flex items-center justify-center">
-                  <span className="w-2 h-2 rounded-full bg-forest-400"></span>
-                </div>
-              </div>
-              <span className="absolute bottom-2 right-3 text-[8px] font-mono text-gray-500">25.4208° N, 51.4886° E</span>
-            </div>
-          </div>
-
-          {/* RIGHT PANEL: LIVE TELEMETRY STREAM TERMINAL */}
-          <div className="lg:col-span-2 border border-white/10 bg-[#0c1214] rounded-2xl p-4 shadow-2xl flex flex-col space-y-3 font-mono">
-            <div className="flex items-center justify-between pb-2 border-b border-white/5">
+            <div className="flex justify-between items-center pb-2 border-b relative" style={{ borderColor: 'rgba(179,146,66,0.12)' }}>
               <div className="flex items-center space-x-2">
-                <Terminal className="w-4 h-4 text-forest-400" />
-                <span className="text-[10px] font-bold text-gray-300">TELEMETRY INGESTION STREAM</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[9px] font-bold tracking-wider" style={{ color: '#cebfaa' }}>LUSAIL OPERATIONS CORE</span>
               </div>
-              <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-500 text-[8px] font-bold rounded">LIVE FEED</span>
+              <span className="text-[9px] font-semibold" style={{ color: '#6b5b44' }}>CLASS-A SECURITY</span>
             </div>
 
-            <div className="flex-1 bg-[#090e0f] rounded-xl p-3 border border-white/5 text-[9px] text-gray-400 space-y-2 overflow-y-auto max-h-[220px]">
-              {logs.map((log, idx) => {
-                let color = 'text-gray-400';
-                if (log.startsWith('SENSOR')) color = 'text-blue-400';
-                if (log.startsWith('API')) color = 'text-teal-400';
-                if (log.startsWith('AI')) color = 'text-purple-400';
-                if (log.startsWith('INCIDENT')) color = 'text-red-400';
-                if (log.startsWith('SUSTAINABILITY')) color = 'text-emerald-400';
+            {/* KPI Grid */}
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 relative">
+              {[
+                { label: 'Total Occupancy', value: '78,912', sub: '98.6% Capacity', color: '#34d399' },
+                { label: 'Active Incidents', value: '02', sub: 'Queue C, Food Court A', color: '#f59e0b' },
+                { label: 'Renewable Power', value: '38.6%', sub: 'Solar — Grid Ready', color: '#2dd4bf' },
+              ].map((kpi, i) => (
+                <div key={i} className="rounded-xl p-2.5 sm:p-3 flex flex-col justify-between border"
+                  style={{ background: '#150f08', borderColor: 'rgba(179,146,66,0.10)' }}>
+                  <span className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: '#6b5b44' }}>{kpi.label}</span>
+                  <span className="text-base sm:text-xl font-bold block" style={{ color: kpi.color }}>{kpi.value}</span>
+                  <span className="text-[8px] font-semibold block mt-0.5" style={{ color: '#4a3e2f' }}>{kpi.sub}</span>
+                </div>
+              ))}
+            </div>
 
-                return (
-                  <div key={idx} className={`${color} leading-normal`}>
-                    {log}
-                  </div>
-                );
-              })}
+            {/* Mini radar map */}
+            <div className="h-20 sm:h-28 rounded-xl border flex items-center justify-center relative overflow-hidden"
+              style={{ background: 'rgba(28,62,53,0.06)', borderColor: 'rgba(28,62,53,0.15)' }}>
+              {[64, 36, 18].map((size, i) => (
+                <div key={i}
+                  className="absolute rounded-full border border-emerald-500/20 animate-pulse"
+                  style={{ width: size * 2, height: size * 2, animationDelay: `${i * 0.5}s`, opacity: 0.6 - i * 0.15 }} />
+              ))}
+              <div className="w-3 h-3 rounded-full bg-emerald-500 z-10" />
+              <span className="absolute bottom-2 right-3 text-[8px] font-mono" style={{ color: '#6b5b44' }}>25.4208° N, 51.4886° E</span>
             </div>
           </div>
+
+          {/* Right: Telemetry Stream */}
+          <div
+            className="lg:col-span-2 rounded-2xl p-4 sm:p-5 flex flex-col space-y-3 border font-mono"
+            style={{ background: '#0d0904', borderColor: 'rgba(179,146,66,0.15)', boxShadow: '0 8px 32px rgba(0,0,0,0.50)' }}
+          >
+            <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'rgba(179,146,66,0.12)' }}>
+              <div className="flex items-center space-x-2">
+                <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[9px] font-bold" style={{ color: '#cebfaa' }}>TELEMETRY STREAM</span>
+              </div>
+              <span className="px-1.5 py-0.5 rounded text-[8px] font-bold" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}>
+                LIVE
+              </span>
+            </div>
+            <div className="flex-1 rounded-xl p-3 border text-[9px] leading-relaxed space-y-1.5 overflow-y-auto max-h-[180px] sm:max-h-[230px]"
+              style={{ background: '#090604', borderColor: 'rgba(179,146,66,0.10)' }}>
+              {logs.map((log, idx) => (
+                <div key={idx} style={{ color: getLogColor(log) }}>
+                  {log}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── STATS BAR ──────────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.6 }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto"
+        >
+          {[
+            { value: 104, suffix: '', label: 'Fixtures Tracked', decimals: 0 },
+            { value: 80000, suffix: '+', label: 'Fan Capacity', decimals: 0 },
+            { value: 38.6, suffix: '%', label: 'Solar Contribution', decimals: 1 },
+            { value: 99.2, suffix: '%', label: 'System Uptime', decimals: 1 },
+          ].map((stat, i) => (
+            <div key={i} className="rounded-xl p-3 sm:p-4 text-center border"
+              style={{ background: 'rgba(179,146,66,0.06)', borderColor: 'rgba(179,146,66,0.14)' }}>
+              <div className="text-xl sm:text-2xl font-black text-emerald-400">
+                <AnimatedCounter end={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
+              </div>
+              <div className="text-[10px] font-semibold mt-0.5" style={{ color: '#6b5b44' }}>{stat.label}</div>
+            </div>
+          ))}
         </motion.div>
 
       </main>
 
-      {/* CORE FEATURES SECTION */}
-      <section id="features" className="bg-[#0b1012] border-t border-gray-800/40 py-20 z-10">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
-            <h2 className="text-xs font-bold text-emerald-450 uppercase tracking-[0.2em]">System Pillars</h2>
-            <h3 className="text-3xl md:text-5xl font-bold text-white font-graffiti skew-x-[-4deg] drop-shadow-[0_2px_12px_rgba(16,185,129,0.35)] select-none">
+      {/* ── FEATURES SECTION ─────────────────────────────────────────────── */}
+      <section id="features" className="z-10 py-16 sm:py-24 border-t" style={{ borderColor: 'rgba(179,146,66,0.12)', background: 'rgba(13,9,4,0.80)' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16 space-y-3">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">System Pillars</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-graffiti select-none" style={{ color: '#f3e4c8' }}>
               Full Stadium Control Suite
-            </h3>
+            </h2>
+            <p className="text-sm" style={{ color: '#8f7a5e' }}>
+              Six integrated modules that power every aspect of stadium operations.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-[#0c1214] border border-white/5 rounded-2xl p-6 hover:border-forest-500/20 transition-all group">
-              <div className="w-10 h-10 rounded-xl bg-forest-500/10 flex items-center justify-center text-forest-400 mb-4 group-hover:bg-forest-500 group-hover:text-white transition-all">
-                <Users className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-white mb-2">Crowd Telemetry & Routing</h4>
-              <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                Sensing gate queue thresholds and predicting transit bottlenecks. Updates wayfinding maps dynamically to optimize flow velocities.
-              </p>
-            </div>
-
-            <div className="bg-[#0c1214] border border-white/5 rounded-2xl p-6 hover:border-forest-500/20 transition-all group">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                <Shield className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-white mb-2">Incident Dispatch Center</h4>
-              <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                Log medical, security, or facility dispatches. Dynamic maps track incident zones and output AI mitigation scripts instantly.
-              </p>
-            </div>
-
-            <div className="bg-[#0c1214] border border-white/5 rounded-2xl p-6 hover:border-forest-500/20 transition-all group">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400 mb-4 group-hover:bg-teal-500 group-hover:text-white transition-all">
-                <Zap className="w-5 h-5" />
-              </div>
-              <h4 className="font-bold text-white mb-2">Event-Driven Automation</h4>
-              <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                Upload CSV or Excel schedules, match results, or solar logs. All databases, dashboards, and AI suggestions sync in seconds.
-              </p>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {features.map((feat, i) => {
+              const Icon = feat.icon;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
+                  className="group rounded-2xl p-5 sm:p-6 border transition-all duration-300 cursor-default"
+                  style={{
+                    background: '#0d0904',
+                    borderColor: 'rgba(179,146,66,0.12)',
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.borderColor = feat.color + '35';
+                    el.style.background = '#110c07';
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.borderColor = 'rgba(179,146,66,0.12)';
+                    el.style.background = '#0d0904';
+                  }}
+                >
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110"
+                    style={{ background: feat.colorBg, color: feat.color }}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold mb-2 text-sm" style={{ color: '#f3e4c8' }}>{feat.title}</h3>
+                  <p className="text-xs leading-relaxed" style={{ color: '#6b5b44' }}>{feat.desc}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-gray-800/40 bg-[#070b0d] py-12 text-center text-xs text-gray-500 z-10 space-y-1">
-        <p>&copy; 2026 FIFA World Cup Venue Operations Consortium. All rights reserved.</p>
-        <p className="text-[10px] text-gray-600 font-medium">Powered by VenueOS AI Engine (Groq Llama 3.3 / Firebase Cloud Admin SDK)</p>
-      </footer>
+      {/* ── CTA BANNER ───────────────────────────────────────────────────── */}
+      <section className="z-10 py-12 sm:py-16 border-t" style={{ borderColor: 'rgba(179,146,66,0.12)' }}>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center space-y-5">
+          <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-[10px] font-bold border"
+            style={{ background: 'rgba(28,62,53,0.15)', borderColor: 'rgba(16,185,129,0.20)', color: '#34d399' }}>
+            <Leaf className="w-3 h-3" />
+            <span>FIFA WORLD CUP 2026 · POWERED BY VenueOS AI</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold" style={{ color: '#f3e4c8' }}>
+            Ready to command the stadium?
+          </h2>
+          <p className="text-sm" style={{ color: '#8f7a5e' }}>
+            Sign in with your operator credentials or launch the guest preview to explore the full platform.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              to="/login"
+              className="flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:-translate-y-0.5 w-full sm:w-auto justify-center"
+              style={{ background: 'linear-gradient(135deg, #1c3e35, #10b981)', boxShadow: '0 8px 20px rgba(16,185,129,0.18)' }}
+            >
+              <span>Operator Login</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/dashboard/overview"
+              className="flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all border hover:-translate-y-0.5 w-full sm:w-auto justify-center"
+              style={{ borderColor: 'rgba(179,146,66,0.25)', color: '#cebfaa', background: 'rgba(179,146,66,0.06)' }}
+            >
+              <span>Guest Preview</span>
+            </Link>
+          </div>
+        </div>
+      </section>
 
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
+      <footer className="z-10 border-t py-8 text-center" style={{ background: '#0e0a06', borderColor: 'rgba(179,146,66,0.12)' }}>
+        <p className="text-xs font-medium" style={{ color: '#4a3e2f' }}>
+          © 2026 FIFA World Cup Venue Operations Consortium · All rights reserved.
+        </p>
+        <p className="text-[10px] mt-1" style={{ color: '#3d3228' }}>
+          Powered by VenueOS AI Engine · Groq Llama 3.3 · Firebase Cloud · Socket.IO
+        </p>
+      </footer>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp, type UserRole } from '../app/providers';
@@ -25,7 +25,9 @@ import {
   Activity,
   Menu,
   X,
-  LogOut
+  LogOut,
+  ChevronLeft,
+  Zap,
 } from 'lucide-react';
 
 const getTranslationKey = (name: string): string => {
@@ -62,6 +64,27 @@ export const DashboardLayout: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsNotificationsOpen(false);
+    setIsRoleDropdownOpen(false);
+  }, [location.pathname]);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-dropdown]')) {
+        setIsNotificationsOpen(false);
+        setIsRoleDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const getRoleAllowedPaths = (currentRole: UserRole) => {
     switch (currentRole) {
@@ -120,17 +143,17 @@ export const DashboardLayout: React.FC = () => {
   }, [role, location.pathname, navigate]);
 
   const navigationItems = [
-    { name: 'Overview', path: '/dashboard/overview', icon: LayoutDashboard },
-    { name: 'Operations Center', path: '/dashboard/operations', icon: Radio },
-    { name: 'Crowd Intelligence', path: '/dashboard/crowd', icon: Users },
-    { name: 'Navigation Center', path: '/dashboard/navigation', icon: Map },
-    { name: 'AI Assistant', path: '/dashboard/ai-assistant', icon: MessageSquare },
-    { name: 'Upload Center', path: '/dashboard/upload-center', icon: Upload },
-    { name: 'Emergency Center', path: '/dashboard/emergency', icon: AlertTriangle, badge: 'Alerts' },
-    { name: 'Accessibility Center', path: '/dashboard/accessibility', icon: Accessibility },
-    { name: 'Sustainability', path: '/dashboard/sustainability', icon: Leaf },
-    { name: 'Reports', path: '/dashboard/reports', icon: FileText },
-    { name: 'Settings', path: '/dashboard/settings', icon: Settings },
+    { name: 'Overview',           path: '/dashboard/overview',        icon: LayoutDashboard },
+    { name: 'Operations Center',  path: '/dashboard/operations',       icon: Radio },
+    { name: 'Crowd Intelligence', path: '/dashboard/crowd',            icon: Users },
+    { name: 'Navigation Center',  path: '/dashboard/navigation',       icon: Map },
+    { name: 'AI Assistant',       path: '/dashboard/ai-assistant',     icon: MessageSquare },
+    { name: 'Upload Center',      path: '/dashboard/upload-center',    icon: Upload },
+    { name: 'Emergency Center',   path: '/dashboard/emergency',        icon: AlertTriangle, badge: 'Alerts' },
+    { name: 'Accessibility Center', path: '/dashboard/accessibility',  icon: Accessibility },
+    { name: 'Sustainability',     path: '/dashboard/sustainability',   icon: Leaf },
+    { name: 'Reports',            path: '/dashboard/reports',          icon: FileText },
+    { name: 'Settings',           path: '/dashboard/settings',         icon: Settings },
   ];
 
   const allowedPaths = getRoleAllowedPaths(role);
@@ -138,238 +161,315 @@ export const DashboardLayout: React.FC = () => {
 
   const getRoleIcon = (currentRole: UserRole) => {
     switch (currentRole) {
-      case 'Security':
-        return <Shield className="w-4 h-4 text-red-500" />;
-      case 'Operations':
-        return <Activity className="w-4 h-4 text-emerald-500" />;
-      case 'Volunteer':
-        return <User className="w-4 h-4 text-blue-500" />;
-      default:
-        return <Users className="w-4 h-4 text-slate-500" />;
+      case 'Security':    return <Shield   className="w-4 h-4 text-red-400" />;
+      case 'Operations':  return <Activity className="w-4 h-4 text-emerald-500" />;
+      case 'Volunteer':   return <User     className="w-4 h-4 text-blue-400" />;
+      default:            return <Users    className="w-4 h-4 text-sand-500" />;
+    }
+  };
+
+  const getRoleColor = (currentRole: UserRole) => {
+    switch (currentRole) {
+      case 'Security':    return 'text-red-400 bg-red-500/10 border-red-500/20';
+      case 'Operations':  return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
+      case 'Volunteer':   return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+      default:            return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
     }
   };
 
   const currentItem = navigationItems.find(item => item.path === location.pathname);
-  const currentPathName = currentItem ? t(getTranslationKey(currentItem.name)) : 'Stadium Dashboard';
+  const currentPathName = currentItem ? t(getTranslationKey(currentItem.name)) : 'Dashboard';
+
+  // ── Sidebar nav item renderer ──────────────────────────────────────
+  const SidebarNavItem = ({ item, collapsed }: { item: typeof navigationItems[0], collapsed?: boolean }) => {
+    const Icon = item.icon;
+    return (
+      <NavLink
+        to={item.path}
+        title={collapsed ? item.name : undefined}
+        className={({ isActive }) =>
+          `group flex items-center ${collapsed ? 'justify-center px-2' : 'justify-between px-3'} py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 ${
+            isActive
+              ? 'bg-forest-500 text-white shadow-glow-green'
+              : 'text-[color:var(--text-secondary)] hover:bg-[color:var(--border-default)] hover:text-[color:var(--text-primary)]'
+          }`
+        }
+      >
+        <div className={`flex items-center ${collapsed ? '' : 'space-x-3'}`}>
+          <Icon className="w-[18px] h-[18px] shrink-0" />
+          {!collapsed && <span className="truncate">{t(getTranslationKey(item.name))}</span>}
+        </div>
+        {!collapsed && item.badge && (
+          <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-amber-500/15 text-amber-500 rounded-full border border-amber-500/25 uppercase tracking-wider">
+            {item.badge}
+          </span>
+        )}
+      </NavLink>
+    );
+  };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-graphite-950 relative">
-      
-      {/* Foggy Background Image Layer */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-[0.05] dark:opacity-[0.08] z-0 filter blur-[3px] saturate-[110%]"
-        style={{ 
-          backgroundImage: "url('/stadium_bg.png'), url('/stadium_bg.jpg'), url('/stadium.jpg'), url('/bg.jpg')" 
-        }}
+    <div
+      className="flex h-screen overflow-hidden relative"
+      style={{ background: 'var(--bg-base)' }}
+    >
+      {/* Foggy Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center pointer-events-none opacity-[0.04] dark:opacity-[0.06] z-0 filter blur-[2px]"
+        style={{ backgroundImage: "url('/stadium_bg.png'), url('/stadium_bg.jpg'), url('/stadium.jpg')" }}
       />
-      
-      {/* SIDEBAR FOR DESKTOP */}
-      <aside className="hidden md:flex md:flex-col md:w-64 my-4 ml-4 bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md border border-gray-150/40 dark:border-graphite-800/40 rounded-3xl shadow-premium shrink-0 relative z-10">
-        
-        {/* LOGO AREA */}
-        <div className="flex items-center space-x-3 px-6 py-5 border-b border-gray-150/40 dark:border-graphite-800/40">
-          <div className="w-8 h-8 rounded-full bg-white dark:bg-graphite-955 border border-gray-150/50 dark:border-graphite-850 flex items-center justify-center p-1 shadow-sm shrink-0">
-            <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-full h-full object-contain animate-spin-slow" />
+
+      {/* ── DESKTOP SIDEBAR ────────────────────────────────────────────── */}
+      <aside
+        className={`hidden md:flex md:flex-col shrink-0 my-3 ml-3 rounded-2xl border transition-all duration-300 relative z-10 ${
+          isSidebarCollapsed ? 'md:w-[64px]' : 'md:w-60'
+        }`}
+        style={{
+          background: 'var(--sidebar-bg)',
+          borderColor: 'var(--sidebar-border)',
+          backdropFilter: 'blur(16px)',
+          boxShadow: 'var(--shadow-card)',
+        }}
+      >
+        {/* Logo */}
+        <div className={`flex items-center border-b py-4 ${isSidebarCollapsed ? 'justify-center px-2' : 'space-x-3 px-4'}`}
+          style={{ borderColor: 'var(--sidebar-border)' }}>
+          <div className="w-8 h-8 rounded-full border flex items-center justify-center p-1 shrink-0"
+            style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}>
+            <img src="/logos/logo.png" alt="VenueOS AI" className="w-full h-full object-contain animate-spin-slow" />
           </div>
-          <div>
-            <span className="text-xs font-black tracking-tight text-forest-500 dark:text-forest-400 block leading-none uppercase">VenueOS AI</span>
-            <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold tracking-wider uppercase">World Cup 2026</span>
-          </div>
+          {!isSidebarCollapsed && (
+            <div className="min-w-0">
+              <span className="text-xs font-black tracking-tight text-forest-500 dark:text-emerald-400 block leading-none uppercase truncate">VenueOS AI</span>
+              <span className="text-[9px] font-bold tracking-wider uppercase" style={{ color: 'var(--text-muted)' }}>World Cup 2026</span>
+            </div>
+          )}
         </div>
 
-        {/* NAVIGATION LINKS */}
-        <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-          {filteredNavigationItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <motion.div
-                key={item.path}
-                whileHover={{ x: 3 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              >
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between px-4 py-2.5 text-[13px] font-semibold rounded-full transition-all duration-200 border-l-3 ${
-                      isActive
-                        ? 'bg-gradient-to-r from-forest-500/90 to-forest-650/90 text-white shadow-premium border-emerald-400'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/50 dark:hover:bg-graphite-800/55 border-transparent'
-                    }`
-                  }
-                >
-                  <div className="flex items-center space-x-3.5">
-                    <Icon className="w-5 h-5" />
-                    <span>{t(getTranslationKey(item.name))}</span>
-                  </div>
-                  {item.badge && (
-                    <span className="px-2 py-0.5 text-[9.5px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-500 rounded-full border border-amber-500/20 uppercase tracking-wider">
-                      {item.badge}
-                    </span>
-                  )}
-                </NavLink>
-              </motion.div>
-            );
-          })}
+        {/* Nav Links */}
+        <nav className={`flex-1 py-3 space-y-0.5 overflow-y-auto ${isSidebarCollapsed ? 'px-2' : 'px-3'}`}>
+          {filteredNavigationItems.map((item) => (
+            <SidebarNavItem key={item.path} item={item} collapsed={isSidebarCollapsed} />
+          ))}
         </nav>
 
-        {/* STAKEHOLDER SELECTOR FOOTER */}
-        <div className="p-4 border-t border-gray-150/40 dark:border-graphite-800/40 bg-gray-50/30 dark:bg-graphite-900/30">
-          <div className="relative">
+        {/* Collapse Toggle */}
+        <div className={`p-3 border-t`} style={{ borderColor: 'var(--sidebar-border)' }}>
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className={`flex items-center justify-center w-full py-2 rounded-xl text-xs font-semibold transition-all hover:bg-[color:var(--border-default)]`}
+            style={{ color: 'var(--text-muted)' }}
+            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${isSidebarCollapsed ? 'rotate-180' : ''}`} />
+            {!isSidebarCollapsed && <span className="ml-2 truncate">Collapse</span>}
+          </button>
+        </div>
+
+        {/* Role Switcher */}
+        {!isSidebarCollapsed && (
+          <div className="px-3 pb-3" data-dropdown>
             <button
               onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-              className="flex items-center justify-between w-full px-4 py-2.5 bg-white/70 dark:bg-graphite-900/70 border border-gray-200 dark:border-graphite-800 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-55 dark:hover:bg-graphite-850 shadow-premium"
+              className={`flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${getRoleColor(role)}`}
             >
-              <div className="flex items-center space-x-2.5">
+              <div className="flex items-center space-x-2">
                 {getRoleIcon(role)}
-                <span>{t('roleLabel')}: {role}</span>
+                <span>{role} View</span>
               </div>
-              <ChevronDown className="w-4 h-4 text-gray-450" />
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
-            {isRoleDropdownOpen && (
-              <div className="absolute bottom-full left-0 w-full mb-1.5 bg-white dark:bg-graphite-900 border border-gray-200 dark:border-graphite-800 rounded-xl shadow-lg z-50 overflow-hidden">
-                {(['Fan', 'Operations', 'Security', 'Volunteer'] as UserRole[]).map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => {
-                      setRole(r);
-                      setIsRoleDropdownOpen(false);
-                    }}
-                    className={`flex items-center space-x-2.5 w-full px-4 py-2.5 text-sm text-left hover:bg-gray-50 dark:hover:bg-graphite-800 ${
-                      role === r ? 'font-black bg-gray-50 dark:bg-graphite-850 text-forest-500 dark:text-forest-400' : 'text-gray-600 dark:text-gray-400 font-semibold'
-                    }`}
-                  >
-                    {getRoleIcon(r)}
-                    <span>{r} {t('roleLabel').toLowerCase() === 'role' ? 'View' : t('roleLabel')}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <AnimatePresence>
+              {isRoleDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute bottom-[72px] left-3 right-3 rounded-xl border shadow-premium-lg overflow-hidden z-50"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
+                >
+                  {(['Fan', 'Operations', 'Security', 'Volunteer'] as UserRole[]).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => { setRole(r); setIsRoleDropdownOpen(false); }}
+                      className={`flex items-center space-x-2.5 w-full px-4 py-2.5 text-xs text-left transition-all ${
+                        role === r
+                          ? 'font-black text-forest-500 dark:text-emerald-400'
+                          : 'font-semibold'
+                      }`}
+                      style={{
+                        color: role === r ? undefined : 'var(--text-secondary)',
+                        background: role === r ? 'var(--accent-glow)' : undefined,
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = role === r ? 'var(--accent-glow)' : 'transparent')}
+                    >
+                      {getRoleIcon(r)}
+                      <span>{r} View</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
+        )}
       </aside>
 
-      {/* MOBILE HEADER MENU */}
-      <div className="flex flex-col flex-1 overflow-hidden relative z-10">
-        
-        {/* FLOATING DETACHED GLASSMORPHIC ROUND NAVIGATION BAR */}
-        <header className="mx-4 md:mx-8 mt-4 mb-2 bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md border border-gray-150/40 dark:border-graphite-800/40 rounded-full shadow-premium flex items-center justify-between h-14 px-5 md:px-6 shrink-0 z-40">
-          
-          {/* HEADER TITLE & MENU BTN */}
-          <div className="flex items-center space-x-3.5">
+      {/* ── MAIN CONTENT AREA ──────────────────────────────────────────── */}
+      <div className="flex flex-col flex-1 overflow-hidden relative z-10 min-w-0">
+
+        {/* ── TOP NAV BAR ──────────────────────────────────────────────── */}
+        <header
+          className="mx-3 mt-3 mb-2 rounded-2xl border flex items-center justify-between h-13 px-3 sm:px-4 shrink-0 z-40"
+          style={{
+            background: 'var(--sidebar-bg)',
+            borderColor: 'var(--sidebar-border)',
+            backdropFilter: 'blur(16px)',
+            boxShadow: 'var(--shadow-card)',
+            minHeight: '52px',
+          }}
+        >
+          {/* Left: Hamburger + Logo + Title */}
+          <div className="flex items-center space-x-2.5 min-w-0">
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-graphite-800"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-1.5 rounded-lg transition-colors shrink-0"
+              style={{ color: 'var(--text-secondary)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              aria-label="Open navigation"
             >
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* MINI ROUND LOGO BADGE IN TOP NAV BAR */}
-            <div className="w-8 h-8 rounded-full bg-white dark:bg-graphite-955 border border-gray-150/50 dark:border-graphite-850 flex items-center justify-center p-1 shadow-sm shrink-0">
-              <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-full h-full object-contain" />
+            <div className="w-7 h-7 rounded-full border flex items-center justify-center p-1 shrink-0 md:hidden"
+              style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}>
+              <img src="/logos/logo.png" alt="VenueOS AI" className="w-full h-full object-contain" />
             </div>
 
-            <h2 className="text-sm font-bold text-gray-850 dark:text-white tracking-tight">
-              {currentPathName}
-            </h2>
+            <div className="flex items-center space-x-2 min-w-0">
+              <h2 className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                {currentPathName}
+              </h2>
+              <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-forest-500/10 text-forest-500 dark:text-emerald-400 border border-forest-500/15 shrink-0">
+                <Zap className="w-2.5 h-2.5" />
+                <span>FIFA WC26</span>
+              </span>
+            </div>
           </div>
 
-          {/* RIGHT UTILITIES PANEL */}
-          <div className="flex items-center space-x-3.5">
-            
-            {/* CONNECTION STATUS TOAST */}
-            <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+          {/* Right: Utilities */}
+          <div className="flex items-center space-x-1 sm:space-x-2 shrink-0">
+            {/* Connection Status */}
+            <div className={`flex items-center space-x-1.5 px-2 py-1 rounded-full text-xs font-bold transition-all border ${
               isConnected
-                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-500'
-                : 'bg-red-500/10 text-red-500 animate-pulse'
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                : 'bg-red-500/10 text-red-500 border-red-500/20 animate-pulse'
             }`}>
-              {isConnected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
-              <span className="hidden sm:inline">{isConnected ? t('liveSync') : t('disconnect')}</span>
+              {isConnected ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{isConnected ? 'Live' : 'Offline'}</span>
             </div>
 
-            {/* LIGHT/DARK TOGGLE */}
+            {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-graphite-800 transition-colors"
-              title="Toggle design mode"
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+              title="Toggle theme"
             >
-              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
 
-            {/* LIVE NOTIFICATIONS ALERTS DROPDOWN */}
-            <div className="relative">
+            {/* Notifications */}
+            <div className="relative" data-dropdown>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="relative p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-graphite-800 transition-colors"
+                className="relative p-2 rounded-lg transition-colors"
+                style={{ color: 'var(--text-muted)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
-                <Bell className="w-5 h-5" />
+                <Bell className="w-4 h-4" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-white dark:border-graphite-900"></span>
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full border border-[color:var(--bg-card)]" />
                 )}
               </button>
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white/95 dark:bg-graphite-900/95 backdrop-blur-md border border-gray-200 dark:border-graphite-800 rounded-xl shadow-lg z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-150 dark:border-graphite-800 bg-gray-50/55 dark:bg-graphite-850/55">
-                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Live Feeds Log</span>
-                    {notifications.length > 0 && (
-                      <button
-                        onClick={clearNotifications}
-                        className="text-xs text-forest-500 dark:text-forest-400 font-bold hover:underline"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                  <div className="max-h-60 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="p-5 text-center text-xs text-gray-400 dark:text-gray-550 font-semibold">
-                        No telemetry logs available.
-                      </div>
-                    ) : (
-                      notifications.map((n, idx) => (
-                        <div
-                          key={idx}
-                          className="px-4 py-2.5 border-b border-gray-100 dark:border-graphite-850 text-xs text-gray-600 dark:text-gray-450 hover:bg-gray-50/50 dark:hover:bg-graphite-850/50 font-semibold"
-                        >
-                          {n}
+              <AnimatePresence>
+                {isNotificationsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl border shadow-premium-lg z-50 overflow-hidden"
+                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 border-b"
+                      style={{ borderColor: 'var(--border-default)', background: 'var(--bg-panel)' }}>
+                      <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>Live Feed Log</span>
+                      {notifications.length > 0 && (
+                        <button onClick={clearNotifications} className="text-xs font-bold text-forest-500 dark:text-emerald-400 hover:underline">
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-60 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-5 text-center text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+                          No telemetry logs available.
                         </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
+                      ) : (
+                        notifications.map((n, idx) => (
+                          <div key={idx} className="px-4 py-2.5 border-b text-xs font-medium" 
+                            style={{ borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}>
+                            {n}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* USER AVATAR / PROFILE & SIGN OUT */}
-            <div className="flex items-center space-x-2 border-l border-gray-200/50 dark:border-graphite-800/50 pl-3">
-              <div className="w-8 h-8 rounded-full bg-forest-500/10 text-forest-500 dark:text-forest-400 flex items-center justify-center font-bold text-xs shrink-0 border border-forest-500/10" title={`Active Role: ${role}`}>
+            {/* Role Avatar + Sign Out */}
+            <div className="flex items-center space-x-1.5 pl-1.5 border-l" style={{ borderColor: 'var(--border-default)' }}>
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 border ${getRoleColor(role)}`}
+                title={`Active Role: ${role}`}
+              >
                 {role.substring(0, 2).toUpperCase()}
               </div>
               <div className="hidden lg:flex flex-col text-left">
-                <span className="text-[10px] font-bold text-gray-750 dark:text-gray-200 leading-none">{role} Director</span>
-                <span className="text-[8px] text-gray-400 dark:text-gray-500 font-semibold uppercase tracking-wider mt-0.5">{role} View</span>
+                <span className="text-[10px] font-bold leading-none" style={{ color: 'var(--text-primary)' }}>{role} Director</span>
+                <span className="text-[8px] font-semibold uppercase tracking-wider mt-0.5" style={{ color: 'var(--text-muted)' }}>Active Role</span>
               </div>
               <button
                 onClick={handleSignOut}
-                className="p-1.5 rounded-lg text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-graphite-800 transition-colors"
-                title={t('signOut')}
+                className="p-1.5 rounded-lg transition-colors text-red-400 hover:text-red-500"
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                title="Sign Out"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
-
           </div>
         </header>
 
-        {/* MAIN BODY OUTLET CONTAINER WITH TRANSITIONS */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pt-2 md:pt-4 bg-gray-55/40 dark:bg-graphite-955/40">
+        {/* ── PAGE CONTENT ─────────────────────────────────────────────── */}
+        <main className="flex-1 overflow-y-auto px-3 pb-3 pt-1 sm:px-4 sm:pb-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-              className="max-w-7xl mx-auto space-y-6"
+              transition={{ duration: 0.20, ease: 'easeOut' }}
+              className="max-w-7xl mx-auto space-y-4 sm:space-y-6"
             >
               <Outlet />
             </motion.div>
@@ -377,44 +477,128 @@ export const DashboardLayout: React.FC = () => {
         </main>
       </div>
 
-      {/* MOBILE COMPACT SIDEBAR MENU DRAWER */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
-          <div className="relative flex flex-col w-64 bg-white/95 dark:bg-graphite-900/95 backdrop-blur-md border-r border-gray-200/40 dark:border-graphite-800/45">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-graphite-800">
-              <span className="text-sm font-bold text-forest-500 dark:text-forest-400">{t('title')}</span>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-graphite-800 rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
-              {filteredNavigationItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center justify-between px-4 py-2.5 text-sm font-semibold rounded-full ${
-                        isActive
-                          ? 'bg-forest-500 text-white shadow-premium'
-                          : 'text-gray-650 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-graphite-800'
-                      }`
-                    }
-                  >
-                    <div className="flex items-center space-x-3.5">
-                      <Icon className="w-5 h-5" />
-                      <span>{t(getTranslationKey(item.name))}</span>
-                    </div>
-                  </NavLink>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-      )}
+      {/* ── MOBILE DRAWER ────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Drawer Panel */}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 350, damping: 35 }}
+              className="fixed top-0 left-0 bottom-0 z-[70] w-72 flex flex-col md:hidden border-r"
+              style={{
+                background: 'var(--sidebar-bg)',
+                backdropFilter: 'blur(20px)',
+                borderColor: 'var(--sidebar-border)',
+              }}
+            >
+              {/* Drawer header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: 'var(--border-default)' }}>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full border flex items-center justify-center p-1"
+                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}>
+                    <img src="/logos/logo.png" alt="VenueOS AI" className="w-full h-full object-contain" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black uppercase text-forest-500 dark:text-emerald-400 block">VenueOS AI</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>World Cup 2026</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 rounded-xl"
+                  style={{ color: 'var(--text-muted)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Role badge in drawer */}
+              <div className="px-4 pt-3 pb-1">
+                <span className={`inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold border ${getRoleColor(role)}`}>
+                  {getRoleIcon(role)}
+                  <span>{role} View</span>
+                </span>
+              </div>
+
+              {/* Nav links */}
+              <nav className="flex-1 px-4 py-3 space-y-0.5 overflow-y-auto">
+                {filteredNavigationItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center justify-between px-3 py-3 rounded-xl text-sm font-semibold transition-all ${
+                          isActive
+                            ? 'bg-forest-500 text-white shadow-glow-green'
+                            : ''
+                        }`
+                      }
+                      style={({ isActive }) => ({
+                        color: isActive ? undefined : 'var(--text-secondary)',
+                        background: undefined,
+                      })}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <div className="flex items-center space-x-3">
+                            <Icon className="w-5 h-5 shrink-0" />
+                            <span>{t(getTranslationKey(item.name))}</span>
+                          </div>
+                          {item.badge && !isActive && (
+                            <span className="text-[9px] font-bold bg-amber-500/15 text-amber-500 px-1.5 py-0.5 rounded-full border border-amber-500/25 uppercase">
+                              {item.badge}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </nav>
+
+              {/* Drawer footer */}
+              <div className="px-4 pb-5 pt-3 border-t space-y-2" style={{ borderColor: 'var(--border-default)' }}>
+                <button
+                  onClick={toggleTheme}
+                  className="flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                  style={{ color: 'var(--text-secondary)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                  <span>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-3 w-full px-3 py-2.5 rounded-xl text-sm font-semibold text-red-500 transition-all"
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
     </div>
   );

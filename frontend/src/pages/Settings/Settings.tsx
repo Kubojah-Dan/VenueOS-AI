@@ -81,27 +81,46 @@ export const Settings: React.FC = () => {
           </form>
 
           {/* INTEGRATIONS MONITOR */}
-          <div className="space-y-4 pt-6 border-t border-gray-150 dark:border-graphite-800">
+          <div className="space-y-4 pt-6 border-t" style={{ borderColor: 'var(--border-default)' }}>
             <div className="flex items-center space-x-2">
-              <Key className="w-4.5 h-4.5 text-forest-500" />
-              <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">External API Integrations</h3>
+              <Key className="w-4 h-4 text-forest-500" />
+              <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-primary)' }}>External API Integrations</h3>
             </div>
 
-            <div className="space-y-3">
-              {apiIntegrations.map((api, idx) => (
-                <div key={idx} className="flex justify-between items-center text-xs p-3 bg-gray-50 dark:bg-graphite-850 rounded-lg">
-                  <span className="font-bold text-gray-700 dark:text-gray-300">{api.name}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold ${
-                    api.status === 'CONNECTED'
-                      ? 'bg-emerald-500/10 text-emerald-600'
-                      : 'bg-blue-500/10 text-blue-500'
-                  }`}>
-                    {api.status}
-                  </span>
-                </div>
-              ))}
+            <div className="space-y-2.5">
+              {apiIntegrations.map((api, idx) => {
+                const s = api.status;
+                const isConnected = s === 'CONNECTED';
+                const isError = s.startsWith('ERROR');
+                const isNA = s === 'N/A';
+                const label = isConnected ? 'Connected' : isError ? 'Error' : isNA ? 'N/A' : s === 'CONNECTING' ? 'Connecting...' : s === 'DEGRADED' ? 'Degraded' : 'No API Key';
+                const colors = isConnected
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                  : isError
+                  ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                  : isNA
+                  ? 'bg-slate-500/10 text-slate-500 border-slate-500/20'
+                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+                return (
+                  <div key={idx} className="flex justify-between items-center text-xs px-3 py-2.5 rounded-xl border"
+                    style={{ background: 'var(--bg-panel)', borderColor: 'var(--border-default)' }}>
+                    <div>
+                      <span className="font-bold block" style={{ color: 'var(--text-primary)' }}>{api.name}</span>
+                      <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>Status as of last poll</span>
+                    </div>
+                    <span className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[9px] font-extrabold border uppercase tracking-wider ${colors}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : isError ? 'bg-red-500' : 'bg-amber-400'}`} />
+                      <span>{label}</span>
+                    </span>
+                  </div>
+                );
+              })}
             </div>
+            <p className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
+              Statuses update every 3–10 minutes when the backend polls external APIs. Set API keys in your <code className="font-mono">.env</code> file to activate real connections.
+            </p>
           </div>
+
 
         </div>
 

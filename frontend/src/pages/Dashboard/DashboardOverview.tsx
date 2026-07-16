@@ -304,61 +304,92 @@ export const DashboardOverview: React.FC = () => {
 
       </div>
 
-      {/* STAKEHOLDER CONSOLE INSTRUCTIONS */}
-      <div className="bg-white dark:bg-graphite-900 border border-gray-150 dark:border-graphite-800 rounded-xl p-5 shadow-premium">
+      {/* STAKEHOLDER CONSOLE */}
+      <div className="rounded-xl p-4 sm:p-5 border"
+        style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)', boxShadow: 'var(--shadow-card)' }}>
         {role === 'Fan' && (
-          <div className="text-xs space-y-1">
-            <p className="font-semibold text-gray-700 dark:text-gray-300">👋 Welcome FIFA Fan!</p>
-            <p className="text-gray-500 font-medium">
-              We recommend using **Gate C** for entering the concourse as queue times are under **8 minutes**. Solar shuttle buses run every 5 minutes from Parking Alpha directly to Gate D (Wheelchair friendly).
+          <div className="text-xs space-y-2">
+            <p className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>👋 Welcome FIFA Fan!</p>
+            <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              We recommend using <strong>Gate C</strong> for entering the concourse — queue times are under <strong>8 minutes</strong>. Solar shuttle buses run every 5 minutes from Parking Alpha directly to Gate D (wheelchair friendly).
             </p>
-            <div className="pt-2 flex gap-4">
-              <Link to="/dashboard/navigation" className="text-forest-500 font-bold hover:underline">View interactive stadium map &rarr;</Link>
-              <Link to="/dashboard/ai-assistant" className="text-forest-500 font-bold hover:underline">Ask AI Assist &rarr;</Link>
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link to="/dashboard/navigation" className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-forest-500/10 text-forest-500 dark:text-emerald-400 border border-forest-500/20 font-bold text-xs hover:bg-forest-500 hover:text-white transition-all">
+                <span>View Stadium Map</span>
+                <span>→</span>
+              </Link>
+              <Link to="/dashboard/ai-assistant" className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg font-bold text-xs border transition-all"
+                style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-default)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border-default)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                Ask AI Assist →
+              </Link>
             </div>
           </div>
         )}
 
         {role === 'Security' && (
           <div className="text-xs space-y-2">
-            <p className="font-semibold text-red-600 dark:text-red-400 flex items-center space-x-1.5">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
+            <p className="font-bold text-sm flex items-center space-x-1.5 text-red-500">
+              <AlertTriangle className="w-4 h-4" />
               <span>Incident Command Directive</span>
             </p>
-            <p className="text-gray-500 font-medium">
-              Turnstile scanners at **Gate A** are offline. Shift crowd operations to secondary flow channels immediately. Crowd density warnings are active for Sector East.
+            <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              Turnstile scanners at <strong>Gate A</strong> are offline. Shift crowd operations to secondary flow channels immediately. Crowd density warnings are active for Sector East.
             </p>
-            <div className="pt-1 flex gap-4">
-              <Link to="/dashboard/emergency" className="text-red-500 font-bold hover:underline">Launch Emergency Announce PA Panel &rarr;</Link>
-              <Link to="/dashboard/operations" className="text-gray-700 dark:text-gray-300 font-bold hover:underline">Check live incident list &rarr;</Link>
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link to="/dashboard/emergency" className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 font-bold text-xs hover:bg-red-500 hover:text-white transition-all">
+                Launch Emergency PA Panel →
+              </Link>
+              <Link to="/dashboard/operations" className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg font-bold text-xs border transition-all"
+                style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-default)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border-default)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                View Live Incident List →
+              </Link>
             </div>
           </div>
         )}
 
         {role === 'Operations' && (
-          <div className="text-xs space-y-1">
-            <p className="font-semibold text-emerald-600 dark:text-emerald-500 flex items-center space-x-1.5">
-              <Activity className="w-4 h-4 text-emerald-500" />
+          <div className="text-xs space-y-2">
+            <p className="font-bold text-sm flex items-center space-x-1.5 text-emerald-500">
+              <Activity className="w-4 h-4" />
               <span>Facility Operations Console</span>
             </p>
-            <p className="text-gray-500 font-medium">
+            <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               Solar reserves are at 38.6%, load-balancing cooling vents in Sector East. Ensure uploaded spreadsheets are validated in the Upload Center.
             </p>
-            <div className="pt-2 flex gap-4">
-              <Link to="/dashboard/upload-center" className="text-forest-500 font-bold hover:underline">Upload new telemetry files &rarr;</Link>
-              <Link to="/dashboard/sustainability" className="text-forest-500 font-bold hover:underline">Sustainability power grid details &rarr;</Link>
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link to="/dashboard/upload-center" className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-forest-500/10 text-forest-500 dark:text-emerald-400 border border-forest-500/20 font-bold text-xs hover:bg-forest-500 hover:text-white transition-all">
+                Upload Telemetry Files →
+              </Link>
+              <Link to="/dashboard/sustainability" className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg font-bold text-xs border transition-all"
+                style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-default)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border-default)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                Power Grid Details →
+              </Link>
             </div>
           </div>
         )}
 
         {role === 'Volunteer' && (
-          <div className="text-xs space-y-1">
-            <p className="font-semibold text-blue-500">🙋 Volunteer Lead Hub</p>
-            <p className="text-gray-500 font-medium">
+          <div className="text-xs space-y-2">
+            <p className="font-bold text-sm text-blue-400">🙋 Volunteer Lead Hub</p>
+            <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               Medical responder dispatch B is currently active at Section 102 assisting with heat exhaustion. Keep entry walkways clean and support spectator route guides.
             </p>
-            <div className="pt-2 flex gap-4">
-              <Link to="/dashboard/navigation" className="text-forest-500 font-bold hover:underline text-xs">Stadium Layout Map &rarr;</Link>
+            <div className="pt-2 flex flex-wrap gap-3">
+              <Link to="/dashboard/navigation" className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold text-xs hover:bg-blue-500 hover:text-white transition-all">
+                Stadium Layout Map →
+              </Link>
+              <Link to="/dashboard/accessibility" className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg font-bold text-xs border transition-all"
+                style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-default)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--border-default)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                Accessibility Center →
+              </Link>
             </div>
           </div>
         )}

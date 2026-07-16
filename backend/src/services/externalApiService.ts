@@ -1,5 +1,6 @@
 import db, { Match } from '../database/db';
 import wsService from './websocketService';
+import { isFirebaseInitialized } from '../config/firebase';
 
 const stadiumMap: Record<string, string> = {
   '1': 'Lusail Stadium',
@@ -51,8 +52,23 @@ class ExternalApiService {
     wind: 'N 12km/h'
   };
 
+  // Real API connection statuses
+  private apiStatus = {
+    footballData: 'CONNECTING',
+    openWeather: 'CONNECTING',
+    firebase: 'CONNECTING',
+    googleMaps: 'N/A'
+  };
+
+  public getApiStatus() {
+    return { ...this.apiStatus };
+  }
+
   public initialize() {
     console.log('Initializing Real-time API Polling (Weather & Match Data)...');
+    
+    // Set firebase status from config
+    this.apiStatus.firebase = isFirebaseInitialized ? 'CONNECTED' : 'DEGRADED';
     
     // Poll immediately on boot
     this.pollWeather();
@@ -76,11 +92,11 @@ class ExternalApiService {
     const key = process.env.OPENWEATHERMAP_API_KEY;
     if (!key) {
       console.log('No Weather API Key. Using Doha climate defaults.');
+      this.apiStatus.openWeather = 'NO_KEY';
       return;
     }
 
     try {
-      // Coordinate coordinates for Lusail Stadium
       const lat = 25.4208;
       const lon = 51.4886;
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${key}`;
@@ -95,14 +111,15 @@ class ExternalApiService {
           wind: `Wind: ${data.wind?.cardinal || 'N'} ${Math.round((data.wind?.speed || 3.3) * 3.6)}km/h`
         };
 
+        this.apiStatus.openWeather = 'CONNECTED';
         console.log(`Weather updated: ${this.currentWeather.temp}°C, ${this.currentWeather.condition}`);
-        
-        // Broadcast weather changes
         wsService.broadcast('weather-updated', this.currentWeather);
       } else {
+        this.apiStatus.openWeather = `ERROR_${response.status}`;
         console.warn(`Weather API returned status: ${response.status}`);
       }
     } catch (err) {
+      this.apiStatus.openWeather = 'ERROR';
       console.error('Failed to query weather API:', err);
     }
   }
@@ -110,12 +127,14 @@ class ExternalApiService {
   private async pollMatches() {
     try {
       console.log('Polling World Cup 2026 matches from worldcup26.ir...');
+      this.apiStatus.footballData = 'CONNECTING';
       const response = await fetch('https://worldcup26.ir/get/games');
       if (response.ok) {
         const data = await response.json() as any;
         const apiGames = data.games || [];
 
         if (apiGames.length > 0) {
+          this.apiStatus.footballData = 'CONNECTED';
           console.log(`Successfully fetched ${apiGames.length} matches from worldcup26.ir.`);
 
           const normalizedMatches: Match[] = apiGames.map((m: any, idx: number) => {
@@ -191,9 +210,11 @@ class ExternalApiService {
           return;
         }
       } else {
+        this.apiStatus.footballData = `ERROR_${response.status}`;
         console.warn(`worldcup26.ir returned status: ${response.status}. Attempting secondary source...`);
       }
     } catch (err) {
+      this.apiStatus.footballData = 'ERROR';
       console.warn('Failed to query primary worldcup26.ir API. Falling back to secondary sources:', err);
     }
 
@@ -219,6 +240,7 @@ class ExternalApiService {
           return;
         }
 
+        this.apiStatus.footballData = 'CONNECTED';
         console.log(`Successfully fetched ${apiMatches.length} matches from Football-Data API.`);
 
         const normalizedMatches: Match[] = apiMatches.map((m: any, idx: number) => {

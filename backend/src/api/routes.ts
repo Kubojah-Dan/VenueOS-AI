@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import db from '../database/db';
 import ingestionService from '../services/ingestionService';
 import aiService from '../services/aiService';
+import externalApiService from '../services/externalApiService';
 
 const routes = Router();
 
@@ -66,9 +67,15 @@ routes.get('/dashboard/overview', (req: Request, res: Response) => {
   const crowd = db.getCrowd();
   const sustainability = db.getSustainability();
   const incidents = db.getIncidents();
+  const weather = externalApiService.getCurrentWeather();
+  const apiStatus = externalApiService.getApiStatus();
 
   res.status(200).json({
-    stats,
+    stats: {
+      ...stats,
+      weather,
+      apiStatus
+    },
     matches,
     crowd,
     sustainability,

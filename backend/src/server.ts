@@ -1,6 +1,7 @@
 import express from 'express';
 import * as http from 'http';
 import cors from 'cors';
+import helmet from 'helmet';
 import * as dotenv from 'dotenv';
 import apiRoutes from './api/routes';
 import db from './database/db';
@@ -17,6 +18,9 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3001;
 
 // Middlewares
+app.use(helmet({
+  contentSecurityPolicy: false, // disable CSP to avoid blocking Leaflet maps / sockets resources in production
+}));
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

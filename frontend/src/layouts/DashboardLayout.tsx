@@ -338,7 +338,7 @@ export const DashboardLayout: React.FC = () => {
               style={{ color: 'var(--text-secondary)' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-              aria-label="Open navigation"
+              aria-label="Open mobile navigation menu"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -379,6 +379,7 @@ export const DashboardLayout: React.FC = () => {
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               title="Toggle theme"
+              aria-label="Toggle visual theme mode"
             >
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
             </button>
@@ -391,6 +392,7 @@ export const DashboardLayout: React.FC = () => {
                 style={{ color: 'var(--text-muted)' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                aria-label="View live alerts notifications"
               >
                 <Bell className="w-4 h-4" />
                 {notifications.length > 0 && (
@@ -453,6 +455,7 @@ export const DashboardLayout: React.FC = () => {
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-default)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                 title="Sign Out"
+                aria-label="Sign out of operators console"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>

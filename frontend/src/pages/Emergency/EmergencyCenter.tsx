@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../app/providers';
+import { API_URL } from '../../config';
 import {
   AlertOctagon,
   Volume2,
@@ -25,19 +26,49 @@ export const EmergencyCenter: React.FC = () => {
   const criticalMultiplier = criticalCount * 25;
   const riskScore = Math.min(baseRisk + criticalMultiplier, 100);
 
-  const handleGeneratePA = (type: 'evac' | 'congestion' | 'medical') => {
-    if (type === 'evac') {
-      setPaScript(
-        "ATTENTION LUSAIL STADIUM SPECTATORS. PLEASE REMAIN CALM. DUE TO AN OPERATIONAL ALARM, SECTORS EAST AND NORTH ARE DIRECTED TO EVACUATE SLOWLY. PLEASE PROCEED TOWARDS THE NEAREST SIGNS LEADING TO GATE C EXIT PORTALS. VOLUNTEERS ARE DEPLOYED TO ASSIST YOU. REPEATING, DO NOT USE ELEVATORS OR RUN IN THE CONCOURSE AREAS."
-      );
-    } else if (type === 'congestion') {
-      setPaScript(
-        "ATTENTION FANS AT GATE A. WE ARE EXPERIENCING DELAYS NEAR THE NORTH ENTRANCE SCANNER GRID. SECURITY DIRECTS ALL SPECTATORS HOLDING TICKETS FOR GATES A-1 THROUGH A-5 TO REROUTE TO THE SOUTH GATE C ENTRANCE PORTAL. WALKWAY LEADERS ARE STANDING BY TO DIRECT YOU."
-      );
-    } else {
-      setPaScript(
-        "OPERATIONAL MESSAGE TO VOLUNTEER STAFF IN SECTOR 102. MEDICAL TEAMS ARE DISPATCHED AND ON SCENE. PLEASE CLEAR THE CENTRAL WALKWAY AND MAINTAIN SECTOR BARRIERS TO ENSURE RAPID PASSAGE FOR RESPONDERS. THANK YOU FOR YOUR IMMEDIATE ASSISTANCE."
-      );
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGeneratePA = async (type: 'evac' | 'congestion' | 'medical') => {
+    setIsGenerating(true);
+    setPaScript('GENERATING CUSTOM AUDIBLE ALERT SCRIPT VIA AI...');
+
+    try {
+      const activeList = activeIncidents.map(i => `${i.category} in ${i.location} (${i.severity}): ${i.description}`).join(', ');
+      
+      const query = `You are a professional Stadium Safety Director. Generate a professional, high-priority public address (PA) megaphone warning script to announce to the stadium crowd.
+Type: ${type}.
+Current Context: Active incidents are [${activeList || 'None'}]. Risk score is ${riskScore}/100.
+The script must be direct, authoritative, in ALL CAPS, and under 50 words. Do not prefix with labels or intros. Output ONLY the announcer announcement text.`;
+
+      const res = await fetch(`${API_URL}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, role: 'Security' })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setPaScript(data.response.toUpperCase().trim());
+      } else {
+        throw new Error('API failed');
+      }
+    } catch (err) {
+      console.warn('Fallback to local PA template.');
+      if (type === 'evac') {
+        setPaScript(
+          "ATTENTION LUSAIL STADIUM SPECTATORS. PLEASE REMAIN CALM. DUE TO AN OPERATIONAL ALARM, SECTORS EAST AND NORTH ARE DIRECTED TO EVACUATE SLOWLY. PLEASE PROCEED TOWARDS THE NEAREST SIGNS LEADING TO GATE C EXIT PORTALS. VOLUNTEERS ARE DEPLOYED TO ASSIST YOU. REPEATING, DO NOT USE ELEVATORS OR RUN IN THE CONCOURSE AREAS."
+        );
+      } else if (type === 'congestion') {
+        setPaScript(
+          "ATTENTION FANS AT GATE A. WE ARE EXPERIENCING DELAYS NEAR THE NORTH ENTRANCE SCANNER GRID. SECURITY DIRECTS ALL SPECTATORS HOLDING TICKETS FOR GATES A-1 THROUGH A-5 TO REROUTE TO THE SOUTH GATE C ENTRANCE PORTAL. WALKWAY LEADERS ARE STANDING BY TO DIRECT YOU."
+        );
+      } else {
+        setPaScript(
+          "OPERATIONAL MESSAGE TO VOLUNTEER STAFF IN SECTOR 102. MEDICAL TEAMS ARE DISPATCHED AND ON SCENE. PLEASE CLEAR THE CENTRAL WALKWAY AND MAINTAIN SECTOR BARRIERS TO ENSURE RAPID PASSAGE FOR RESPONDERS. THANK YOU FOR YOUR IMMEDIATE ASSISTANCE."
+        );
+      }
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -129,20 +160,23 @@ export const EmergencyCenter: React.FC = () => {
             
             <div className="flex flex-wrap gap-2">
               <button
+                disabled={isGenerating}
                 onClick={() => handleGeneratePA('evac')}
-                className="px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-md text-[10px] font-bold transition-all"
+                className="px-3 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-md text-[10px] font-bold transition-all disabled:opacity-50"
               >
                 Evacuation Directive
               </button>
               <button
+                disabled={isGenerating}
                 onClick={() => handleGeneratePA('congestion')}
-                className="px-3 py-1.5 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 rounded-md text-[10px] font-bold transition-all"
+                className="px-3 py-1.5 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 rounded-md text-[10px] font-bold transition-all disabled:opacity-50"
               >
                 Gate Congestion Redirect
               </button>
               <button
+                disabled={isGenerating}
                 onClick={() => handleGeneratePA('medical')}
-                className="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-md text-[10px] font-bold transition-all"
+                className="px-3 py-1.5 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 rounded-md text-[10px] font-bold transition-all disabled:opacity-50"
               >
                 Responder Pathway Alert
               </button>

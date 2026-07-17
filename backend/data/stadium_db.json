@@ -1505,10 +1505,10 @@
     }
   ],
   "sustainability": {
-    "liveEnergyUsageKw": 1687,
+    "liveEnergyUsageKw": 1681,
     "peakEnergyUsageKw": 2200,
-    "solarContributionPercent": 42,
-    "waterConsumptionLiters": 528927,
+    "solarContributionPercent": 36,
+    "waterConsumptionLiters": 529135,
     "reclaimedWaterPercent": 42,
     "carbonEmissionKg": 4120,
     "carbonOffsetsKg": 1450,
@@ -1554,35 +1554,35 @@
     ]
   },
   "crowd": {
-    "crowdFlowRatePpm": 455,
+    "crowdFlowRatePpm": 500,
     "gates": [
       {
         "flowRatePpm": 90,
         "name": "Gate A (North)",
-        "queueTimeMin": 59,
+        "queueTimeMin": 58,
         "status": "CRITICAL"
       },
       {
         "flowRatePpm": 50,
         "name": "Gate B (East)",
-        "queueTimeMin": 59,
+        "queueTimeMin": 60,
         "status": "CRITICAL"
       },
       {
         "flowRatePpm": 110,
         "name": "Gate C (South)",
-        "queueTimeMin": 22,
+        "queueTimeMin": 24,
         "status": "SLOW"
       },
       {
         "flowRatePpm": 80,
         "name": "Gate D (West)",
-        "queueTimeMin": 49,
+        "queueTimeMin": 53,
         "status": "CRITICAL"
       }
     ],
     "maxCapacity": 80000,
-    "occupancyPercentage": 93.2,
+    "occupancyPercentage": 93.3,
     "predictedOccupancy": [
       {
         "actual": 68000,
@@ -1616,29 +1616,29 @@
       {
         "capacity": 20000,
         "name": "Sector North",
-        "occupancy": 18813,
+        "occupancy": 18856,
         "status": "CRITICAL"
       },
       {
         "capacity": 20000,
         "name": "Sector East",
-        "occupancy": 19878,
+        "occupancy": 19859,
         "status": "CRITICAL"
       },
       {
         "capacity": 20000,
         "name": "Sector South",
-        "occupancy": 17322,
+        "occupancy": 17342,
         "status": "CONGESTED"
       },
       {
         "capacity": 20000,
         "name": "Sector West",
-        "occupancy": 17744,
+        "occupancy": 17640,
         "status": "CONGESTED"
       }
     ],
-    "totalOccupancy": 74533
+    "totalOccupancy": 74622
   },
   "uploadHistory": [],
   "users": [

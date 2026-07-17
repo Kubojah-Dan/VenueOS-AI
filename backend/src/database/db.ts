@@ -86,12 +86,21 @@ export interface UploadHistoryItem {
   aiInsights?: string;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  role: 'Operations' | 'Security' | 'Volunteer' | 'Fan';
+}
+
 export interface SchemaDB {
   matches: Match[];
   incidents: Incident[];
   sustainability: Sustainability;
   crowd: Crowd;
   uploadHistory: UploadHistoryItem[];
+  users: User[];
 }
 
 class DatabaseManager {
@@ -111,6 +120,9 @@ class DatabaseManager {
       try {
         const fileContent = fs.readFileSync(this.dbPath, 'utf8');
         this.data = JSON.parse(fileContent);
+        if (!this.data!.users) {
+          this.data!.users = [];
+        }
       } catch (err) {
         console.error('Failed reading local stadium cache. Proceeding with default values.');
       }
@@ -170,6 +182,15 @@ class DatabaseManager {
           }
         }
 
+        // 5. Sync Users from Firestore
+        const usersSnapshot = await firestoreDb.collection('users').get();
+        if (!usersSnapshot.empty) {
+          const list: User[] = [];
+          usersSnapshot.forEach((doc) => list.push(doc.data() as User));
+          this.data!.users = list;
+          console.log(`Synced ${list.length} users from Firestore.`);
+        }
+
       } catch (err) {
         console.error('Firebase DB sync warning (continuing with local cache):', err);
       }
@@ -216,7 +237,8 @@ class DatabaseManager {
       incidents,
       sustainability,
       crowd,
-      uploadHistory: []
+      uploadHistory: [],
+      users: []
     };
   }
 
@@ -373,6 +395,22 @@ class DatabaseManager {
       if (isFirebaseInitialized && firestoreDb) {
         firestoreDb.collection('upload_history').doc(item.id).set(item).catch(err => {});
       }
+    }
+  }
+
+  // Users Collection
+  public getUsers(): User[] {
+    return this.data?.users || [];
+  }
+
+  public addUser(user: User) {
+    if (!this.data) return;
+    if (!this.data.users) this.data.users = [];
+    this.data.users.push(user);
+    this.save();
+
+    if (isFirebaseInitialized && firestoreDb) {
+      firestoreDb.collection('users').doc(user.id).set(user).catch(err => {});
     }
   }
 }

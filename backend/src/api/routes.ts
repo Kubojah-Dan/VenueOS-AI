@@ -2,10 +2,18 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
-import db from '../database/db';
+import * as crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+import db, { User } from '../database/db';
 import ingestionService from '../services/ingestionService';
 import aiService from '../services/aiService';
 import externalApiService from '../services/externalApiService';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'venueos-super-secret-key-FIFA2026';
+
+const hashPassword = (password: string): string => {
+  return crypto.createHash('sha256').update(password).digest('hex');
+};
 
 const routes = Router();
 
@@ -156,6 +164,181 @@ routes.post('/chat', async (req: Request, res: Response) => {
     );
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Error executing AI query' });
+  }
+});
+
+// ==========================================
+// AUTHENTICATION SYSTEM (JWT + Google + Firebase fallback)
+// ==========================================
+
+// POST /api/auth/register
+routes.post('/auth/register', (req: Request, res: Response): any => {
+  const { name, email, password, role } = req.body;
+  if (!name || !email || !password || !role) {
+    return res.status(400).json({ error: 'All fields (name, email, password, role) are required.' });
+  }
+
+  const users = db.getUsers();
+  const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (existingUser) {
+    return res.status(400).json({ error: 'An account with this email already exists.' });
+  }
+
+  const newUser: User = {
+    id: `user-${Math.random().toString(36).substr(2, 9)}`,
+    name,
+    email: email.toLowerCase(),
+    passwordHash: hashPassword(password),
+    role: role as any
+  };
+
+  db.addUser(newUser);
+
+  // Generate JWT Session Token
+  const token = jwt.sign(
+    { userId: newUser.id, email: newUser.email, role: newUser.role, name: newUser.name },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  res.status(201).json({
+    token,
+    user: {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role
+    }
+  });
+});
+
+// POST /api/auth/login
+routes.post('/auth/login', (req: Request, res: Response): any => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required.' });
+  }
+
+  const users = db.getUsers();
+  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+  // Check custom hardcoded fallback users if database is empty or they use default credentials
+  if (!user) {
+    const fallbackPasswords: Record<string, string> = {
+      'director@worldcup2026.org': 'password123',
+      'security@worldcup2026.org': 'password123',
+      'volunteer@worldcup2026.org': 'password123',
+      'fan@worldcup2026.org': 'password123'
+    };
+    const fallbackRoles: Record<string, 'Operations' | 'Security' | 'Volunteer' | 'Fan'> = {
+      'director@worldcup2026.org': 'Operations',
+      'security@worldcup2026.org': 'Security',
+      'volunteer@worldcup2026.org': 'Volunteer',
+      'fan@worldcup2026.org': 'Fan'
+    };
+
+    if (fallbackPasswords[email.toLowerCase()] && fallbackPasswords[email.toLowerCase()] === password) {
+      const fallbackUser: User = {
+        id: `user-fallback-${fallbackRoles[email.toLowerCase()]}`,
+        name: `${fallbackRoles[email.toLowerCase()]} Shift Supervisor`,
+        email: email.toLowerCase(),
+        passwordHash: hashPassword(password),
+        role: fallbackRoles[email.toLowerCase()]
+      };
+      
+      const token = jwt.sign(
+        { userId: fallbackUser.id, email: fallbackUser.email, role: fallbackUser.role, name: fallbackUser.name },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+      
+      return res.status(200).json({
+        token,
+        user: {
+          id: fallbackUser.id,
+          name: fallbackUser.name,
+          email: fallbackUser.email,
+          role: fallbackUser.role
+        }
+      });
+    }
+
+    return res.status(401).json({ error: 'Invalid email or password.' });
+  }
+
+  if (user.passwordHash !== hashPassword(password)) {
+    return res.status(401).json({ error: 'Invalid email or password.' });
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, email: user.email, role: user.role, name: user.name },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  res.status(200).json({
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    }
+  });
+});
+
+// POST /api/auth/google (Federated Identity Provider)
+routes.post('/auth/google', (req: Request, res: Response): any => {
+  const { email, name, role } = req.body;
+  if (!email || !name) {
+    return res.status(400).json({ error: 'Google email and name are required.' });
+  }
+
+  const users = db.getUsers();
+  let user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+  if (!user) {
+    // Register as new user via Google
+    user = {
+      id: `user-google-${Math.random().toString(36).substr(2, 9)}`,
+      name,
+      email: email.toLowerCase(),
+      passwordHash: hashPassword(Math.random().toString(36)), // random fallback password
+      role: (role || 'Fan') as any
+    };
+    db.addUser(user);
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, email: user.email, role: user.role, name: user.name },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  res.status(200).json({
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    }
+  });
+});
+
+// GET /api/auth/me (Protected Profile Check)
+routes.get('/auth/me', (req: Request, res: Response): any => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized. Missing token.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    res.status(200).json({ user: decoded });
+  } catch (err) {
+    res.status(401).json({ error: 'Unauthorized. Invalid session token.' });
   }
 });
 

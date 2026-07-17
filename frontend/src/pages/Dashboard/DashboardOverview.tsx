@@ -27,7 +27,29 @@ import {
 import { Link } from 'react-router-dom';
 
 export const DashboardOverview: React.FC = () => {
-  const { role, matches, crowd, sustainability, incidents, uploadHistory, weather, t, isConnected } = useApp();
+  const { role, matches, crowd, sustainability, incidents, uploadHistory, weather, t, isConnected, isLoading } = useApp();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 font-sans">
+        {/* Header Skeleton */}
+        <div className="h-16 skeleton w-full" />
+        
+        {/* KPI Skeletons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="h-28 skeleton" />
+          <div className="h-28 skeleton" />
+          <div className="h-28 skeleton" />
+        </div>
+
+        {/* Main Grid Skeletons */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-96 skeleton" />
+          <div className="h-96 skeleton" />
+        </div>
+      </div>
+    );
+  }
 
   const activeIncidents = incidents.filter(i => i.status !== 'RESOLVED');
   

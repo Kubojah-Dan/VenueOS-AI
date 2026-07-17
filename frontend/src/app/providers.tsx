@@ -264,9 +264,22 @@ const translations: Record<string, Record<string, string>> = {
   }
 };
 
+export interface UserSession {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
 interface AppContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
+  user: UserSession | null;
+  token: string | null;
+  login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
+  register: (name: string, email: string, pass: string, role: UserRole) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: (name: string, email: string, role: UserRole) => Promise<boolean>;
+  logout: () => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   highContrast: boolean;
@@ -274,6 +287,7 @@ interface AppContextType {
   fontSize: 'standard' | 'medium' | 'large';
   changeFontSize: (sz: 'standard' | 'medium' | 'large') => void;
   isConnected: boolean;
+  isLoading: boolean;
   matches: Match[];
   incidents: Incident[];
   sustainability: Sustainability;
@@ -304,6 +318,132 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [notifications, setNotifications] = useState<string[]>([]);
   const [language, setLanguage] = useState<'en' | 'es' | 'ar' | 'fr'>('en');
+
+  const [user, setUser] = useState<UserSession | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('venueos_token'));
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // On mount, check token
+  useEffect(() => {
+    const verifySession = async () => {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+          setRoleState(data.user.role);
+          setIsConnected(true);
+        } else {
+          logout();
+        }
+      } catch (err) {
+        console.warn('Auth server offline. Operating in fallback offline mode.');
+      }
+    };
+    verifySession();
+  }, [token]);
+
+  const login = async (email: string, pass: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('venueos_token', data.token);
+        setToken(data.token);
+        setUser(data.user);
+        setRoleState(data.user.role);
+        return { success: true };
+      } else {
+        const errData = await res.json();
+        return { success: false, error: errData.error || 'Authentication failed' };
+      }
+    } catch (err) {
+      // Offline fallback login check
+      const fallbackRoles: Record<string, UserRole> = {
+        'director@worldcup2026.org': 'Operations',
+        'security@worldcup2026.org': 'Security',
+        'volunteer@worldcup2026.org': 'Volunteer',
+        'fan@worldcup2026.org': 'Fan'
+      };
+      if (fallbackRoles[email.toLowerCase()] && pass === 'password123') {
+        const dummyUser = {
+          id: 'user-offline',
+          name: `${fallbackRoles[email.toLowerCase()]} Director`,
+          email: email.toLowerCase(),
+          role: fallbackRoles[email.toLowerCase()]
+        };
+        setUser(dummyUser);
+        setRoleState(dummyUser.role);
+        return { success: true };
+      }
+      return { success: false, error: 'Auth service connection error' };
+    }
+  };
+
+  const register = async (name: string, email: string, pass: string, newRole: UserRole) => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pass, role: newRole })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('venueos_token', data.token);
+        setToken(data.token);
+        setUser(data.user);
+        setRoleState(data.user.role);
+        return { success: true };
+      } else {
+        const errData = await res.json();
+        return { success: false, error: errData.error || 'Registration failed' };
+      }
+    } catch (err) {
+      return { success: false, error: 'Registration service connection error' };
+    }
+  };
+
+  const loginWithGoogle = async (name: string, email: string, newRole: UserRole) => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, role: newRole })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('venueos_token', data.token);
+        setToken(data.token);
+        setUser(data.user);
+        setRoleState(data.user.role);
+        return true;
+      }
+    } catch (err) {
+      console.warn('Google auth server offline. Fallback client login.');
+    }
+    const dummyUser = {
+      id: 'user-google-offline',
+      name,
+      email,
+      role: newRole
+    };
+    setUser(dummyUser);
+    setRoleState(newRole);
+    return true;
+  };
+
+  const logout = () => {
+    localStorage.removeItem('venueos_token');
+    setToken(null);
+    setUser(null);
+  };
 
   // State caches
   const [matches, setMatches] = useState<Match[]>([]);
@@ -415,6 +555,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch (err) {
       console.warn('Dashboard server offline. Operating in simulation mode.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -505,6 +647,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         role,
         setRole,
+        user,
+        token,
+        login,
+        register,
+        loginWithGoogle,
+        logout,
         theme,
         toggleTheme,
         highContrast,
@@ -512,6 +660,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         fontSize,
         changeFontSize,
         isConnected,
+        isLoading,
         matches,
         incidents,
         sustainability,

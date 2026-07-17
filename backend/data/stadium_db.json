@@ -1095,8 +1095,8 @@
     {
       "id": "wc-104",
       "matchNumber": 79,
-      "homeTeam": "Home TBD",
-      "awayTeam": "Away TBD",
+      "homeTeam": "Spain",
+      "awayTeam": "Argentina",
       "homeScore": 0,
       "awayScore": 0,
       "status": "SCHEDULED",
@@ -1277,8 +1277,8 @@
     {
       "id": "wc-103",
       "matchNumber": 92,
-      "homeTeam": "Home TBD",
-      "awayTeam": "Away TBD",
+      "homeTeam": "France",
+      "awayTeam": "England",
       "homeScore": 0,
       "awayScore": 0,
       "status": "SCHEDULED",
@@ -1459,21 +1459,6 @@
   ],
   "incidents": [
     {
-      "id": "inc-001",
-      "category": "Medical",
-      "severity": "MEDIUM",
-      "description": "Fan experiencing heat exhaustion at Section 102, Row E.",
-      "location": "Section 102",
-      "status": "IN_PROGRESS",
-      "reportedAt": "2026-07-14T18:45:00Z",
-      "assignedTeam": "Medical Response Team B",
-      "actions": "First aid responders arrived. Rehydration salts and cooling pads administered.",
-      "coordinates": {
-        "x": 48.23,
-        "y": 16.37
-      }
-    },
-    {
       "id": "inc-002",
       "category": "Crowd",
       "severity": "HIGH",
@@ -1486,6 +1471,21 @@
       "coordinates": {
         "x": 48.24,
         "y": 16.38
+      }
+    },
+    {
+      "id": "inc-001",
+      "category": "Medical",
+      "severity": "MEDIUM",
+      "description": "Fan experiencing heat exhaustion at Section 102, Row E.",
+      "location": "Section 102",
+      "status": "IN_PROGRESS",
+      "reportedAt": "2026-07-14T18:45:00Z",
+      "assignedTeam": "Medical Response Team B",
+      "actions": "First aid responders arrived. Rehydration salts and cooling pads administered.",
+      "coordinates": {
+        "x": 48.23,
+        "y": 16.37
       }
     },
     {
@@ -1505,10 +1505,10 @@
     }
   ],
   "sustainability": {
-    "liveEnergyUsageKw": 812,
+    "liveEnergyUsageKw": 1703,
     "peakEnergyUsageKw": 2200,
-    "solarContributionPercent": 33,
-    "waterConsumptionLiters": 328571,
+    "solarContributionPercent": 50,
+    "waterConsumptionLiters": 527620,
     "reclaimedWaterPercent": 42,
     "carbonEmissionKg": 4120,
     "carbonOffsetsKg": 1450,
@@ -1554,35 +1554,35 @@
     ]
   },
   "crowd": {
-    "crowdFlowRatePpm": 715,
+    "crowdFlowRatePpm": 370,
     "gates": [
       {
         "flowRatePpm": 90,
         "name": "Gate A (North)",
-        "queueTimeMin": 18,
-        "status": "SLOW"
+        "queueTimeMin": 59,
+        "status": "CRITICAL"
       },
       {
         "flowRatePpm": 50,
         "name": "Gate B (East)",
-        "queueTimeMin": 57,
+        "queueTimeMin": 52,
         "status": "CRITICAL"
       },
       {
         "flowRatePpm": 110,
         "name": "Gate C (South)",
-        "queueTimeMin": 14,
+        "queueTimeMin": 5,
         "status": "NORMAL"
       },
       {
         "flowRatePpm": 80,
         "name": "Gate D (West)",
-        "queueTimeMin": 41,
+        "queueTimeMin": 60,
         "status": "CRITICAL"
       }
     ],
     "maxCapacity": 80000,
-    "occupancyPercentage": 96.6,
+    "occupancyPercentage": 92.7,
     "predictedOccupancy": [
       {
         "actual": 68000,
@@ -1616,29 +1616,30 @@
       {
         "capacity": 20000,
         "name": "Sector North",
-        "occupancy": 18500,
+        "occupancy": 18757,
         "status": "CRITICAL"
       },
       {
         "capacity": 20000,
         "name": "Sector East",
-        "occupancy": 17745,
-        "status": "CONGESTED"
+        "occupancy": 19956,
+        "status": "CRITICAL"
       },
       {
         "capacity": 20000,
         "name": "Sector South",
-        "occupancy": 18602,
-        "status": "CRITICAL"
+        "occupancy": 17152,
+        "status": "CONGESTED"
       },
       {
         "capacity": 20000,
         "name": "Sector West",
-        "occupancy": 19004,
-        "status": "CRITICAL"
+        "occupancy": 17538,
+        "status": "CONGESTED"
       }
     ],
-    "totalOccupancy": 77282
+    "totalOccupancy": 74195
   },
-  "uploadHistory": []
+  "uploadHistory": [],
+  "users": []
 }

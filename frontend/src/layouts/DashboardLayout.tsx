@@ -56,6 +56,8 @@ export const DashboardLayout: React.FC = () => {
     isConnected,
     notifications,
     clearNotifications,
+    logout,
+    token,
     t
   } = useApp();
   
@@ -131,16 +133,20 @@ export const DashboardLayout: React.FC = () => {
   };
 
   const handleSignOut = () => {
-    setRole('Fan');
+    logout();
     navigate('/login');
   };
 
   React.useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
     const allowed = getRoleAllowedPaths(role);
     if (!allowed.includes(location.pathname)) {
       navigate('/dashboard/overview');
     }
-  }, [role, location.pathname, navigate]);
+  }, [role, token, location.pathname, navigate]);
 
   const navigationItems = [
     { name: 'Overview',           path: '/dashboard/overview',        icon: LayoutDashboard },

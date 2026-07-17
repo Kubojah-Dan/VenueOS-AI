@@ -388,6 +388,98 @@ export const Landing: React.FC = () => {
 
       </main>
 
+      {/* ── LIVE TOURNAMENT TELEMETRY SIMULATION HUB ────────────────────── */}
+      <section className="z-10 py-8 px-4 max-w-6xl mx-auto w-full relative">
+        <div className="bg-white/5 dark:bg-graphite-900/40 backdrop-blur-md border border-gray-150/10 dark:border-graphite-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-premium">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping mr-1"></span>
+                Live Simulation Node
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black mt-2 text-white">Stadium Telemetry Hub</h2>
+              <p className="text-xs text-gray-400 font-semibold">Active telemetry dashboard representing the live sensor load at Lusail Stadium</p>
+            </div>
+            <div className="flex space-x-2">
+              <Link
+                to="/login"
+                className="px-4 py-2 bg-forest-500 hover:bg-forest-600 text-white rounded-xl text-xs font-bold shadow-premium transition-all flex items-center space-x-1.5"
+              >
+                <span>Access Live Console</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-150/10 dark:border-graphite-850">
+            {/* Live Match Feed */}
+            <div className="bg-white/5 dark:bg-graphite-950 p-4 rounded-2xl border border-gray-150/10 dark:border-graphite-900 space-y-3">
+              <div className="flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                <span>Active Fixture</span>
+                <span className="text-red-400 animate-pulse font-black">78' Live</span>
+              </div>
+              <div className="flex items-center justify-between text-xs font-black text-white">
+                <span className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 bg-blue-500 rounded-full"></span>
+                  <span>USA</span>
+                </span>
+                <span>2</span>
+              </div>
+              <div className="flex items-center justify-between text-xs font-black text-white">
+                <span className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+                  <span>MEXICO</span>
+                </span>
+                <span>1</span>
+              </div>
+              <div className="text-[9.5px] text-emerald-400 font-bold bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
+                AI Suggestion: Re-route Gate B crowd via sector North due to high density flow.
+              </div>
+            </div>
+
+            {/* Live Sensors Grid */}
+            <div className="bg-white/5 dark:bg-graphite-950 p-4 rounded-2xl border border-gray-150/10 dark:border-graphite-900 space-y-3">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Lusail Infrastructure Telemetry</div>
+              <div className="space-y-2.5 text-xs font-semibold">
+                <div className="flex justify-between items-center text-gray-300">
+                  <span>Solar Contribution</span>
+                  <span className="text-emerald-400 font-bold">42.8%</span>
+                </div>
+                <div className="w-full bg-gray-800 h-1 rounded-full overflow-hidden">
+                  <div className="bg-emerald-400 h-full w-[42.8%]" />
+                </div>
+                <div className="flex justify-between items-center text-gray-300">
+                  <span>Optical Gate Flow Rate</span>
+                  <span className="text-blue-400 font-bold">480 PPM</span>
+                </div>
+                <div className="w-full bg-gray-800 h-1 rounded-full overflow-hidden">
+                  <div className="bg-blue-400 h-full w-[60%]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Standings */}
+            <div className="bg-white/5 dark:bg-graphite-950 p-4 rounded-2xl border border-gray-150/10 dark:border-graphite-900 space-y-2">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Group A Live Standings</div>
+              <div className="space-y-1.5 text-[11px] font-semibold text-gray-300">
+                <div className="flex justify-between items-center py-0.5 border-b border-gray-800">
+                  <span>1. USA</span>
+                  <span className="font-extrabold text-white">7 pts</span>
+                </div>
+                <div className="flex justify-between items-center py-0.5 border-b border-gray-800">
+                  <span>2. MEXICO</span>
+                  <span className="font-extrabold text-white">4 pts</span>
+                </div>
+                <div className="flex justify-between items-center py-0.5">
+                  <span>3. CANADA</span>
+                  <span className="font-extrabold text-white">2 pts</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── FEATURES SECTION ─────────────────────────────────────────────── */}
       <section id="features" className="z-10 py-16 sm:py-24 border-t"
         style={{ borderColor: SL.border, background: 'rgba(15,23,42,0.90)' }}>

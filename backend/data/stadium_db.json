@@ -1505,10 +1505,10 @@
     }
   ],
   "sustainability": {
-    "liveEnergyUsageKw": 1703,
+    "liveEnergyUsageKw": 1687,
     "peakEnergyUsageKw": 2200,
-    "solarContributionPercent": 50,
-    "waterConsumptionLiters": 527620,
+    "solarContributionPercent": 42,
+    "waterConsumptionLiters": 528927,
     "reclaimedWaterPercent": 42,
     "carbonEmissionKg": 4120,
     "carbonOffsetsKg": 1450,
@@ -1554,7 +1554,7 @@
     ]
   },
   "crowd": {
-    "crowdFlowRatePpm": 370,
+    "crowdFlowRatePpm": 455,
     "gates": [
       {
         "flowRatePpm": 90,
@@ -1565,24 +1565,24 @@
       {
         "flowRatePpm": 50,
         "name": "Gate B (East)",
-        "queueTimeMin": 52,
+        "queueTimeMin": 59,
         "status": "CRITICAL"
       },
       {
         "flowRatePpm": 110,
         "name": "Gate C (South)",
-        "queueTimeMin": 5,
-        "status": "NORMAL"
+        "queueTimeMin": 22,
+        "status": "SLOW"
       },
       {
         "flowRatePpm": 80,
         "name": "Gate D (West)",
-        "queueTimeMin": 60,
+        "queueTimeMin": 49,
         "status": "CRITICAL"
       }
     ],
     "maxCapacity": 80000,
-    "occupancyPercentage": 92.7,
+    "occupancyPercentage": 93.2,
     "predictedOccupancy": [
       {
         "actual": 68000,
@@ -1616,30 +1616,38 @@
       {
         "capacity": 20000,
         "name": "Sector North",
-        "occupancy": 18757,
+        "occupancy": 18813,
         "status": "CRITICAL"
       },
       {
         "capacity": 20000,
         "name": "Sector East",
-        "occupancy": 19956,
+        "occupancy": 19878,
         "status": "CRITICAL"
       },
       {
         "capacity": 20000,
         "name": "Sector South",
-        "occupancy": 17152,
+        "occupancy": 17322,
         "status": "CONGESTED"
       },
       {
         "capacity": 20000,
         "name": "Sector West",
-        "occupancy": 17538,
+        "occupancy": 17744,
         "status": "CONGESTED"
       }
     ],
-    "totalOccupancy": 74195
+    "totalOccupancy": 74533
   },
   "uploadHistory": [],
-  "users": []
+  "users": [
+    {
+      "id": "user-google-6xtnx7ydc",
+      "name": "Google Operator",
+      "email": "director@worldcup2026.org",
+      "passwordHash": "fdd7580a131c6d555f2262e67f45f697fb79851d6b084de435b0252f4fc99a30",
+      "role": "Operations"
+    }
+  ]
 }

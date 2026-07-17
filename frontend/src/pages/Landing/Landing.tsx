@@ -195,23 +195,24 @@ export const Landing: React.FC = () => {
             <span className="text-[9px] font-bold tracking-wider uppercase" style={{ color: SL.textMuted }}>World Cup 2026</span>
           </div>
         </div>
-        <nav className="flex items-center space-x-2 sm:space-x-4">
-          <a href="#features" className="hidden sm:inline text-xs font-semibold transition-colors" style={{ color: SL.textMuted }}
+        <nav className="flex items-center space-x-2 sm:space-x-3">
+          <a href="#features" className="hidden sm:inline text-xs font-semibold transition-colors animate-fade-in" style={{ color: SL.textMuted }}
             onMouseEnter={e => (e.currentTarget.style.color = SL.textPrim)}
             onMouseLeave={e => (e.currentTarget.style.color = SL.textMuted)}>
             Features
           </a>
-          <Link to="/login" className="text-xs font-semibold transition-colors" style={{ color: SL.textSec }}
+          <Link to="/login" className="hidden sm:inline text-xs font-semibold transition-colors" style={{ color: SL.textSec }}
             onMouseEnter={e => (e.currentTarget.style.color = SL.textPrim)}
             onMouseLeave={e => (e.currentTarget.style.color = SL.textSec)}>
             Sign In
           </Link>
           <Link
             to="/dashboard/overview"
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90"
+            className="flex items-center space-x-1 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 shrink-0"
             style={{ background: 'linear-gradient(135deg, #1c3e35, #0e1f1b)', border: '1px solid rgba(16,185,129,0.30)' }}
           >
-            <span>Launch Console</span>
+            <span className="hidden sm:inline">Launch Console</span>
+            <span className="sm:hidden">Launch</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </nav>

@@ -254,10 +254,10 @@ Ask me details about queue times, medical dispatches, or power grids.`;
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-140px)] overflow-hidden font-sans">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:h-[calc(100vh-140px)] overflow-y-auto lg:overflow-hidden font-sans">
       
       {/* CHAT INTERACTIVE VIEWPORT */}
-      <div className="lg:col-span-3 flex flex-col bg-white dark:bg-graphite-900 border border-gray-150 dark:border-graphite-800 rounded-2xl shadow-premium overflow-hidden h-full">
+      <div className="lg:col-span-3 flex flex-col bg-white dark:bg-graphite-900 border border-gray-150 dark:border-graphite-800 rounded-2xl shadow-premium overflow-hidden h-[500px] lg:h-full">
         
         {/* CHAT HEADER */}
         <div className="px-6 py-3.5 border-b border-gray-150 dark:border-graphite-800 bg-gray-55 dark:bg-graphite-900 flex items-center justify-between">
@@ -393,7 +393,7 @@ Ask me details about queue times, medical dispatches, or power grids.`;
       </div>
 
       {/* RAG CONTEXT PANEL */}
-      <div className="bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md border border-gray-150/40 dark:border-graphite-800/40 rounded-2xl shadow-premium p-5 flex flex-col h-full overflow-hidden">
+      <div className="bg-white/70 dark:bg-graphite-900/60 backdrop-blur-md border border-gray-150/40 dark:border-graphite-800/40 rounded-2xl shadow-premium p-5 flex flex-col h-auto lg:h-full overflow-hidden">
         <div className="flex items-center space-x-2.5 mb-4">
           <BookOpen className="w-4.5 h-4.5 text-forest-500" />
           <h3 className="text-xs font-bold text-gray-700 dark:text-white uppercase tracking-wider">Semantic Knowledge</h3>

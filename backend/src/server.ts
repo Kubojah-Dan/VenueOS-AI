@@ -30,7 +30,7 @@ app.use('/api', apiRoutes);
 
 // Health check endpoint
 app.get('/health', (req: express.Request, res: express.Response) => {
-  res.status(200).json({ status: 'OK', service: 'venueos-ai-backend', timestamp: new Date().toISOString() });
+  res.status(200).json({ status: 'OK', service: 'aegisstadium-ai-backend', timestamp: new Date().toISOString() });
 });
 
 // Initialize and Boot System Components
@@ -51,12 +51,12 @@ async function startServer() {
     // 4. Start listening
     server.listen(PORT, () => {
       console.log(`====================================================`);
-      console.log(`  VENUEOS AI - SMART STADIUM OPERATING SYSTEM       `);
+      console.log(`  AEGISSTADIUM AI - SMART STADIUM OPERATING SYSTEM  `);
       console.log(`  Running on: http://localhost:${PORT}             `);
       console.log(`====================================================`);
     });
   } catch (err) {
-    console.error('Critical boot error in VenueOS AI Server:', err);
+    console.error('Critical boot error in AegisStadium AI Server:', err);
     process.exit(1);
   }
 }

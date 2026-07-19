@@ -88,9 +88,9 @@ export const Login: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link to="/" className="inline-flex items-center space-x-2">
           <div className="w-10 h-10 rounded-xl bg-white dark:bg-graphite-900 border border-gray-150 dark:border-graphite-800 flex items-center justify-center p-1.5 shadow-premium">
-            <img src="/logos/logo.png" alt="VenueOS AI Logo" className="w-full h-full object-contain" />
+            <img src="/logos/logo.png" alt="AegisStadium AI Logo" className="w-full h-full object-contain" />
           </div>
-          <span className="text-lg font-black tracking-wider text-forest-500 dark:text-forest-400">VenueOS AI</span>
+          <span className="text-lg font-black tracking-wider text-forest-500 dark:text-forest-400 font-graffiti">AegisStadium AI</span>
         </Link>
         <h2 className="mt-6 text-2xl font-black tracking-tight text-gray-900 dark:text-white">
           {isSignUp ? 'Create Operator Profile' : 'Authenticate Shift Session'}

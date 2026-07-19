@@ -320,7 +320,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [language, setLanguage] = useState<'en' | 'es' | 'ar' | 'fr'>('en');
 
   const [user, setUser] = useState<UserSession | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('venueos_token'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem('aegisstadium_token'));
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // On mount, check token
@@ -355,7 +355,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('venueos_token', data.token);
+        localStorage.setItem('aegisstadium_token', data.token);
         setToken(data.token);
         setUser(data.user);
         setRoleState(data.user.role);
@@ -396,7 +396,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('venueos_token', data.token);
+        localStorage.setItem('aegisstadium_token', data.token);
         setToken(data.token);
         setUser(data.user);
         setRoleState(data.user.role);
@@ -419,7 +419,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('venueos_token', data.token);
+        localStorage.setItem('aegisstadium_token', data.token);
         setToken(data.token);
         setUser(data.user);
         setRoleState(data.user.role);
@@ -440,7 +440,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = () => {
-    localStorage.removeItem('venueos_token');
+    localStorage.removeItem('aegisstadium_token');
     setToken(null);
     setUser(null);
   };
@@ -576,14 +576,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     s.on('connect', () => {
       setIsConnected(true);
-      console.log('Connected to VenueOS Socket Engine.');
+      console.log('Connected to AegisStadium Socket Engine.');
       s.emit('join-role', role);
     });
 
     s.on('disconnect', () => {
       setIsConnected(true); // Treat reconnects gracefully
       setIsConnected(false);
-      console.log('Disconnected from VenueOS Socket Engine.');
+      console.log('Disconnected from AegisStadium Socket Engine.');
     });
 
     // Real-time synchronization event hooks

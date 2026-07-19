@@ -1,12 +1,12 @@
-# VenueOS AI - Intelligent Stadium Operating System
+# AegisStadium AI - Intelligent Stadium Operating System
 
-VenueOS AI is a next-generation stadium management console designed to handle real-time telemetry, spectator flows, emergency dispatches, and semantic AI operations assistance. It is optimized for major sporting events, including the FIFA World Cup 2026.
+AegisStadium AI is a next-generation stadium management console designed to handle real-time telemetry, spectator flows, emergency dispatches, and semantic AI operations assistance. It is optimized for major sporting events, including the FIFA World Cup 2026.
 
 ---
 
 ## 1. System Architecture
 
-The following sequence mapping represents the event-driven data flow of the VenueOS platform:
+The following sequence mapping represents the event-driven data flow of the AegisStadium platform:
 
 ```mermaid
 graph TD

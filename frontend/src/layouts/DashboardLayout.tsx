@@ -242,11 +242,11 @@ export const DashboardLayout: React.FC = () => {
           style={{ borderColor: 'var(--sidebar-border)' }}>
           <div className="w-8 h-8 rounded-full border flex items-center justify-center p-1 shrink-0"
             style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}>
-            <img src="/logos/logo.png" alt="VenueOS AI" className="w-full h-full object-contain animate-spin-slow" />
+            <img src="/logos/logo.png" alt="AegisStadium AI" className="w-full h-full object-contain animate-spin-slow" />
           </div>
           {!isSidebarCollapsed && (
             <div className="min-w-0">
-              <span className="text-xs font-black tracking-tight text-forest-500 dark:text-emerald-400 block leading-none uppercase truncate">VenueOS AI</span>
+              <span className="text-xs font-black tracking-tight text-forest-500 dark:text-emerald-400 block leading-none uppercase truncate font-graffiti">AegisStadium AI</span>
               <span className="text-[9px] font-bold tracking-wider uppercase" style={{ color: 'var(--text-muted)' }}>World Cup 2026</span>
             </div>
           )}
@@ -351,7 +351,7 @@ export const DashboardLayout: React.FC = () => {
 
             <div className="w-7 h-7 rounded-full border flex items-center justify-center p-1 shrink-0 md:hidden"
               style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}>
-              <img src="/logos/logo.png" alt="VenueOS AI" className="w-full h-full object-contain" />
+              <img src="/logos/logo.png" alt="AegisStadium AI" className="w-full h-full object-contain" />
             </div>
 
             <div className="flex items-center space-x-2 min-w-0">
@@ -517,10 +517,10 @@ export const DashboardLayout: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-full border flex items-center justify-center p-1"
                     style={{ background: 'var(--bg-card)', borderColor: 'var(--border-default)' }}>
-                    <img src="/logos/logo.png" alt="VenueOS AI" className="w-full h-full object-contain" />
+                    <img src="/logos/logo.png" alt="AegisStadium AI" className="w-full h-full object-contain" />
                   </div>
                   <div>
-                    <span className="text-xs font-black uppercase text-forest-500 dark:text-emerald-400 block">VenueOS AI</span>
+                    <span className="text-xs font-black uppercase text-forest-500 dark:text-emerald-400 block font-graffiti">AegisStadium AI</span>
                     <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>World Cup 2026</span>
                   </div>
                 </div>

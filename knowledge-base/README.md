@@ -1,4 +1,4 @@
-# VenueOS AI - Knowledge Base
+# AegisStadium AI - Knowledge Base
 
 This directory contains stadium layouts, evacuation guides, emergency protocols, and accessibility rules used by the AI RAG Engine.
 

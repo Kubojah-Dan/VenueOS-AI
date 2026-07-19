@@ -43,7 +43,7 @@ class AIService {
     const sustainability = db.getSustainability();
 
     // 3. Formulate the comprehensive System Prompt
-    const systemPrompt = `You are VenueOS AI, the Intelligent Operating System for smart stadiums, currently deployed for the FIFA World Cup 2026.
+    const systemPrompt = `You are AegisStadium AI, the Intelligent Operating System for smart stadiums, currently deployed for the FIFA World Cup 2026.
 You are assisting a user in the role of: "${role}".
 Your responses MUST be professional, concise, extremely operational, and adhere to "mission critical" guidelines.
 
@@ -222,9 +222,9 @@ ${ragContext}
 
 If you require modifications to these policies, please update the corresponding guide file via the **Upload Center**.`;
     } else {
-      response = `### VenueOS AI Operational Support
+      response = `### AegisStadium AI Operational Support
 
-Hello! I am **VenueOS AI**, the stadium's real-time intelligence assistant. 
+Hello! I am **AegisStadium AI**, the stadium's real-time intelligence assistant. 
 
 As a **${role}**, you can ask me questions about:
 1. **Queue Predictions & Gate States** (e.g. "What is the wait time at Gate A?")

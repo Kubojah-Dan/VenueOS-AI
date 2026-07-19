@@ -126,7 +126,7 @@ const SL = {
 // ── Main Component ────────────────────────────────────────────────────────
 export const Landing: React.FC = () => {
   const [logs, setLogs] = useState<string[]>([
-    'SYSTEM [09:12:01]: Initializing VenueOS telemetry ingestion node...',
+    'SYSTEM [09:12:01]: Initializing AegisStadium telemetry ingestion node...',
     'SENSOR [09:12:02]: Calibrating Gate A-D ingress optical sensors...',
     'API [09:12:04]: OpenWeatherMap telemetry connected — Doha 39°C Clear',
     'DATABASE [09:12:05]: Firebase collections successfully bound.',
@@ -188,10 +188,10 @@ export const Landing: React.FC = () => {
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 rounded-full border flex items-center justify-center p-1 shrink-0"
             style={{ background: 'rgba(255,255,255,0.05)', borderColor: SL.border }}>
-            <img src="/logos/logo.png" alt="VenueOS AI" className="w-full h-full object-contain animate-spin-slow" />
+            <img src="/logos/logo.png" alt="AegisStadium AI" className="w-full h-full object-contain animate-spin-slow" />
           </div>
           <div>
-            <span className="text-xs font-black tracking-tight text-emerald-400 block leading-none uppercase">VenueOS AI</span>
+            <span className="text-xs font-black tracking-tight text-emerald-400 block leading-none uppercase font-graffiti">AegisStadium AI</span>
             <span className="text-[9px] font-bold tracking-wider uppercase" style={{ color: SL.textMuted }}>World Cup 2026</span>
           </div>
         </div>
@@ -539,7 +539,7 @@ export const Landing: React.FC = () => {
           <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full text-[10px] font-bold border"
             style={{ background: 'rgba(28,62,53,0.15)', borderColor: 'rgba(16,185,129,0.22)', color: '#34d399' }}>
             <Leaf className="w-3 h-3" />
-            <span>FIFA WORLD CUP 2026 · POWERED BY VenueOS AI</span>
+            <span>FIFA WORLD CUP 2026 · POWERED BY AegisStadium AI</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold" style={{ color: SL.textPrim }}>
             Ready to command the stadium?
@@ -573,7 +573,7 @@ export const Landing: React.FC = () => {
           © 2026 FIFA World Cup Venue Operations Consortium · All rights reserved.
         </p>
         <p className="text-[10px] mt-1" style={{ color: SL.textMuted, opacity: 0.6 }}>
-          Powered by VenueOS AI Engine · Groq Llama 3.3 · Firebase Cloud · Socket.IO
+          Powered by AegisStadium AI Engine · Groq Llama 3.3 · Firebase Cloud · Socket.IO
         </p>
       </footer>
     </div>

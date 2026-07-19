@@ -4,11 +4,15 @@ import * as path from 'path';
 interface DocumentChunk {
   text: string;
   source: string;
-  tokens: Set<string>;
+  termFrequencies: Map<string, number>;
+  totalTerms: number;
 }
 
 class LocalVectorStore {
   private chunks: DocumentChunk[] = [];
+  private idfMap: Map<string, number> = new Map();
+  private allUniqueTerms: Set<string> = new Set();
+  
   private stopwords = new Set([
     'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'arent',
     'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
@@ -34,7 +38,8 @@ class LocalVectorStore {
     if (fs.existsSync(kbDir)) {
       this.scanDirectory(kbDir);
     }
-    console.log(`Initialized Local Vector Store with ${this.chunks.length} document chunks.`);
+    this.calculateIDF();
+    console.log(`Initialized Cosine Similarity Vector Store with ${this.chunks.length} document chunks.`);
   }
 
   private scanDirectory(dir: string) {
@@ -51,7 +56,6 @@ class LocalVectorStore {
           const source = path.relative(path.join(__dirname, '../../../'), fullPath);
           
           if (item.endsWith('.json')) {
-            // Index strings inside JSON
             this.chunkText(JSON.stringify(JSON.parse(content), null, 2), source);
           } else {
             this.chunkText(content, source);
@@ -64,67 +68,125 @@ class LocalVectorStore {
   }
 
   private chunkText(text: string, source: string) {
-    // Split by paragraphs first (double newlines) or group sentences
     const sections = text.split(/\n\s*\n/);
     for (const sec of sections) {
       const trimmed = sec.trim();
       if (trimmed.length < 20) continue;
       
-      // Create chunk
+      const wordsList = this.tokenize(trimmed);
+      if (wordsList.length === 0) continue;
+
+      const termFrequencies = new Map<string, number>();
+      for (const word of wordsList) {
+        termFrequencies.set(word, (termFrequencies.get(word) || 0) + 1);
+        this.allUniqueTerms.add(word);
+      }
+
       this.chunks.push({
         text: trimmed,
         source,
-        tokens: this.tokenize(trimmed)
+        termFrequencies,
+        totalTerms: wordsList.length
       });
     }
   }
 
-  private tokenize(text: string): Set<string> {
+  private tokenize(text: string): string[] {
     const words = text
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .split(/\s+/);
       
-    const set = new Set<string>();
+    const result: string[] = [];
     for (const w of words) {
       if (w.length > 1 && !this.stopwords.has(w)) {
-        set.add(w);
+        result.push(w);
       }
     }
-    return set;
+    return result;
+  }
+
+  private calculateIDF() {
+    this.idfMap.clear();
+    const docCount = this.chunks.length;
+    if (docCount === 0) return;
+
+    for (const term of this.allUniqueTerms) {
+      let containingDocs = 0;
+      for (const chunk of this.chunks) {
+        if (chunk.termFrequencies.has(term)) {
+          containingDocs++;
+        }
+      }
+      // IDF using logarithmic scale with smoothing
+      const idf = Math.log(1 + docCount / (1 + containingDocs));
+      this.idfMap.set(term, idf);
+    }
   }
 
   public addText(text: string, source: string) {
     this.chunkText(text, source);
-    console.log(`Dynamically indexed text chunk from ${source}. Store size: ${this.chunks.length} chunks.`);
+    this.calculateIDF();
+    console.log(`Dynamically indexed text chunk. Store size: ${this.chunks.length} chunks.`);
   }
 
-  // Calculate standard Jaccard Similarity / TF-IDF approximation
+  // Retrieval using Dense Term-Frequency Inverse-Document-Frequency Cosine Similarity
   public query(queryText: string, limit: number = 3): Array<{ text: string; source: string; score: number }> {
-    const queryTokens = this.tokenize(queryText);
-    if (queryTokens.size === 0) return [];
+    const queryWords = this.tokenize(queryText);
+    if (queryWords.length === 0 || this.chunks.length === 0) return [];
+
+    // Compute TF for the query vector
+    const queryFrequencies = new Map<string, number>();
+    for (const word of queryWords) {
+      queryFrequencies.set(word, (queryFrequencies.get(word) || 0) + 1);
+    }
+
+    // Build Query TF-IDF Vector
+    const queryVector = new Map<string, number>();
+    let queryMagnitudeSquared = 0;
+    
+    for (const [term, count] of queryFrequencies.entries()) {
+      const tf = count / queryWords.length;
+      const idf = this.idfMap.get(term) || 0.0;
+      const tfidf = tf * idf;
+      queryVector.set(term, tfidf);
+      queryMagnitudeSquared += tfidf * tfidf;
+    }
+
+    const queryMagnitude = Math.sqrt(queryMagnitudeSquared);
+    if (queryMagnitude === 0) return [];
 
     const results = this.chunks.map((chunk) => {
-      let matchCount = 0;
-      for (const t of queryTokens) {
-        if (chunk.tokens.has(t)) {
-          matchCount++;
+      let dotProduct = 0;
+      let docMagnitudeSquared = 0;
+
+      // Calculate doc TF-IDF vector magnitude
+      for (const [term, count] of chunk.termFrequencies.entries()) {
+        const docTf = count / chunk.totalTerms;
+        const docIdf = this.idfMap.get(term) || 0.0;
+        const docTfidf = docTf * docIdf;
+        docMagnitudeSquared += docTfidf * docTfidf;
+
+        // Dot product with query vector
+        if (queryVector.has(term)) {
+          dotProduct += docTfidf * (queryVector.get(term) || 0);
         }
       }
-      
-      // Jaccard similarity index
-      const unionSize = new Set([...queryTokens, ...chunk.tokens]).size;
-      const score = unionSize > 0 ? matchCount / unionSize : 0;
-      
+
+      const docMagnitude = Math.sqrt(docMagnitudeSquared);
+      const cosineSimilarity = (docMagnitude > 0 && queryMagnitude > 0)
+        ? (dotProduct / (docMagnitude * queryMagnitude))
+        : 0;
+
       return {
         text: chunk.text,
         source: chunk.source,
-        score
+        score: cosineSimilarity
       };
     });
 
     return results
-      .filter((r) => r.score > 0)
+      .filter((r) => r.score > 0.02) // minimal filter
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
   }

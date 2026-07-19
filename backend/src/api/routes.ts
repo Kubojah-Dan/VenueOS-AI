@@ -2,17 +2,21 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db, { User } from '../database/db';
 import ingestionService from '../services/ingestionService';
 import aiService from '../services/aiService';
 import externalApiService from '../services/externalApiService';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'venueos-super-secret-key-FIFA2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'aegisstadium-super-secret-key-FIFA2026';
 
 const hashPassword = (password: string): string => {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  return bcrypt.hashSync(password, 12);
+};
+
+const comparePassword = (password: string, hash: string): boolean => {
+  return bcrypt.compareSync(password, hash);
 };
 
 const routes = Router();
@@ -198,7 +202,7 @@ routes.post('/auth/register', (req: Request, res: Response): any => {
   const token = jwt.sign(
     { userId: newUser.id, email: newUser.email, role: newUser.role, name: newUser.name },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '7d', algorithm: 'HS256' }
   );
 
   res.status(201).json({
@@ -249,7 +253,7 @@ routes.post('/auth/login', (req: Request, res: Response): any => {
       const token = jwt.sign(
         { userId: fallbackUser.id, email: fallbackUser.email, role: fallbackUser.role, name: fallbackUser.name },
         JWT_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: '7d', algorithm: 'HS256' }
       );
       
       return res.status(200).json({
@@ -266,14 +270,14 @@ routes.post('/auth/login', (req: Request, res: Response): any => {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
-  if (user.passwordHash !== hashPassword(password)) {
+  if (!comparePassword(password, user.passwordHash)) {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
   const token = jwt.sign(
     { userId: user.id, email: user.email, role: user.role, name: user.name },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '7d', algorithm: 'HS256' }
   );
 
   res.status(200).json({
@@ -312,7 +316,7 @@ routes.post('/auth/google', (req: Request, res: Response): any => {
   const token = jwt.sign(
     { userId: user.id, email: user.email, role: user.role, name: user.name },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '7d', algorithm: 'HS256' }
   );
 
   res.status(200).json({
@@ -335,7 +339,7 @@ routes.get('/auth/me', (req: Request, res: Response): any => {
 
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as any;
     res.status(200).json({ user: decoded });
   } catch (err) {
     res.status(401).json({ error: 'Unauthorized. Invalid session token.' });

@@ -26,7 +26,7 @@ export const AIAssistant: React.FC = () => {
     {
       id: 'welcome',
       role: 'assistant',
-      content: `### Welcome to VenueOS AI Dispatch Assistant\n\nI am connected to the Lusail Stadium smart grid, gates, and incident databases. How can I support your shift as **${role}**?`
+      content: `### Welcome to AegisStadium AI Dispatch Assistant\n\nI am connected to the Lusail Stadium smart grid, gates, and incident databases. How can I support your shift as **${role}**?`
     }
   ]);
   const [input, setInput] = useState('');
@@ -234,7 +234,7 @@ ${active.some(i=>i.severity==='CRITICAL') ? `> [!IMPORTANT]\n> Turnstile readers
 
       reply = `### Tournament Scoreboard & Schedules\n\n${details}`;
     } else {
-      reply = `### VenueOS AI Copilot
+      reply = `### AegisStadium AI Copilot
 I am your smart stadium operations assistant.
 
 Indexed sources:
@@ -266,7 +266,7 @@ Ask me details about queue times, medical dispatches, or power grids.`;
               <MessageSquare className="w-4.5 h-4.5" />
             </div>
             <div>
-              <span className="text-xs font-bold text-gray-800 dark:text-white block">VenueOS AI Dispatch Assistant</span>
+              <span className="text-xs font-bold text-gray-800 dark:text-white block">AegisStadium AI Dispatch Assistant</span>
               <span className="text-[9px] text-gray-400 font-semibold tracking-wide">Streaming Llama 3.3 70B & Dynamic RAG context</span>
             </div>
           </div>

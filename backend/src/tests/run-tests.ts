@@ -5,7 +5,7 @@ import aiService from '../services/aiService';
 // Custom lightweight test runner for backend services validation
 async function runTests() {
   console.log('====================================================');
-  console.log('🚀 RUNNING VENUEOS BACKEND UNIT TESTS...');
+  console.log('🚀 RUNNING AEGISSTADIUM BACKEND UNIT TESTS...');
   console.log('====================================================');
 
   let passed = 0;

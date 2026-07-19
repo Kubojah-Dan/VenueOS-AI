@@ -26,7 +26,7 @@ const NotFound = lazy(() => import('../pages/NotFound/NotFound'));
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-[400px] w-full py-12">
     <div className="w-8 h-8 border-2 border-forest-500 border-t-transparent rounded-full animate-spin"></div>
-    <span className="mt-4 text-sm text-gray-500 font-medium">Loading VenueOS AI Panel...</span>
+    <span className="mt-4 text-sm text-gray-500 font-medium">Loading AegisStadium AI Panel...</span>
   </div>
 );
 

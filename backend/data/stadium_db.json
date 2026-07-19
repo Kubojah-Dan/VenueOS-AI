@@ -1505,10 +1505,10 @@
     }
   ],
   "sustainability": {
-    "liveEnergyUsageKw": 1681,
+    "liveEnergyUsageKw": 1396,
     "peakEnergyUsageKw": 2200,
-    "solarContributionPercent": 36,
-    "waterConsumptionLiters": 529135,
+    "solarContributionPercent": 51,
+    "waterConsumptionLiters": 535901,
     "reclaimedWaterPercent": 42,
     "carbonEmissionKg": 4120,
     "carbonOffsetsKg": 1450,
@@ -1554,35 +1554,35 @@
     ]
   },
   "crowd": {
-    "crowdFlowRatePpm": 500,
+    "crowdFlowRatePpm": 319,
     "gates": [
       {
         "flowRatePpm": 90,
         "name": "Gate A (North)",
-        "queueTimeMin": 58,
+        "queueTimeMin": 55,
         "status": "CRITICAL"
       },
       {
         "flowRatePpm": 50,
         "name": "Gate B (East)",
-        "queueTimeMin": 60,
+        "queueTimeMin": 56,
         "status": "CRITICAL"
       },
       {
         "flowRatePpm": 110,
         "name": "Gate C (South)",
-        "queueTimeMin": 24,
-        "status": "SLOW"
+        "queueTimeMin": 4,
+        "status": "NORMAL"
       },
       {
         "flowRatePpm": 80,
         "name": "Gate D (West)",
-        "queueTimeMin": 53,
+        "queueTimeMin": 36,
         "status": "CRITICAL"
       }
     ],
     "maxCapacity": 80000,
-    "occupancyPercentage": 93.3,
+    "occupancyPercentage": 93.5,
     "predictedOccupancy": [
       {
         "actual": 68000,
@@ -1616,29 +1616,29 @@
       {
         "capacity": 20000,
         "name": "Sector North",
-        "occupancy": 18856,
+        "occupancy": 19558,
         "status": "CRITICAL"
       },
       {
         "capacity": 20000,
         "name": "Sector East",
-        "occupancy": 19859,
+        "occupancy": 19610,
         "status": "CRITICAL"
       },
       {
         "capacity": 20000,
         "name": "Sector South",
-        "occupancy": 17342,
+        "occupancy": 17406,
         "status": "CONGESTED"
       },
       {
         "capacity": 20000,
         "name": "Sector West",
-        "occupancy": 17640,
+        "occupancy": 17981,
         "status": "CONGESTED"
       }
     ],
-    "totalOccupancy": 74622
+    "totalOccupancy": 74832
   },
   "uploadHistory": [],
   "users": [

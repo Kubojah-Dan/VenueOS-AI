@@ -55,10 +55,7 @@ export const Login: React.FC = () => {
       // Simulate Google Sign-In redirect / window popup delay
       await new Promise((resolve) => setTimeout(resolve, 1200));
       
-      const dummyGoogleName = isSignUp && name ? name : 'Google Operator';
-      const dummyGoogleEmail = email.includes('@') ? email : 'google.operator@worldcup2026.org';
-      
-      const success = await loginWithGoogle(dummyGoogleName, dummyGoogleEmail, role);
+      const success = await loginWithGoogle(role);
       if (success) {
         navigate('/dashboard/overview');
       } else {

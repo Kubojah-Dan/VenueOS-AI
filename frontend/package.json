@@ -11,6 +11,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "firebase": "^10.11.0",
     "framer-motion": "^11.2.6",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.379.0",

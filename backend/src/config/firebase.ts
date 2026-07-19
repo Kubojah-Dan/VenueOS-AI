@@ -7,6 +7,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 let firestoreDb: admin.firestore.Firestore | null = null;
 let realtimeDb: admin.database.Database | null = null;
+let firebaseAuth: admin.auth.Auth | null = null;
 let isFirebaseInitialized = false;
 
 try {
@@ -30,6 +31,7 @@ try {
     
     firestoreDb = admin.firestore();
     realtimeDb = admin.database();
+    firebaseAuth = admin.auth();
     isFirebaseInitialized = true;
     console.log('Firebase Admin SDK successfully connected.');
   } else {
@@ -39,4 +41,4 @@ try {
   console.error('Failed to initialize Firebase Admin SDK. Falling back to local JSON database mode.', err);
 }
 
-export { firestoreDb, realtimeDb, isFirebaseInitialized };
+export { firestoreDb, realtimeDb, isFirebaseInitialized, firebaseAuth };

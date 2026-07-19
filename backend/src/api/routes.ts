@@ -1,18 +1,32 @@
+import * as admin from 'firebase-admin';
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import db, { User } from '../database/db';
 import ingestionService from '../services/ingestionService';
 import aiService from '../services/aiService';
 import externalApiService from '../services/externalApiService';
+import { firebaseAuth } from '../config/firebase';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aegisstadium-super-secret-key-FIFA2026';
 
 const hashPassword = (password: string): string => {
   return bcrypt.hashSync(password, 12);
+};
+
+const verifyFirebaseIdToken = async (req: Request): Promise<admin.auth.DecodedIdToken | null> => {
+  if (!firebaseAuth) return null;
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  const idToken = authHeader.split(' ')[1];
+
+  try {
+    return await firebaseAuth.verifyIdToken(idToken);
+  } catch (err) {
+    return null;
+  }
 };
 
 const comparePassword = (password: string, hash: string): boolean => {
@@ -176,34 +190,37 @@ routes.post('/chat', async (req: Request, res: Response) => {
 // ==========================================
 
 // POST /api/auth/register
-routes.post('/auth/register', (req: Request, res: Response): any => {
-  const { name, email, password, role } = req.body;
-  if (!name || !email || !password || !role) {
-    return res.status(400).json({ error: 'All fields (name, email, password, role) are required.' });
+routes.post('/auth/register', async (req: Request, res: Response): Promise<any> => {
+  const decoded = await verifyFirebaseIdToken(req);
+  if (!decoded || !decoded.email) {
+    return res.status(401).json({ error: 'Invalid or missing Firebase ID token.' });
   }
 
+  const { role } = req.body;
+  if (!role) {
+    return res.status(400).json({ error: 'Role is required for registration.' });
+  }
+
+  const email = decoded.email.toLowerCase();
+  const name = decoded.name || decoded.email.split('@')[0];
   const users = db.getUsers();
-  const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+  const existingUser = users.find(u => u.email.toLowerCase() === email);
   if (existingUser) {
     return res.status(400).json({ error: 'An account with this email already exists.' });
   }
 
   const newUser: User = {
-    id: `user-${Math.random().toString(36).substr(2, 9)}`,
+    id: `user-firebase-${decoded.uid}`,
     name,
-    email: email.toLowerCase(),
-    passwordHash: hashPassword(password),
+    email,
+    passwordHash: hashPassword(Math.random().toString(36)),
     role: role as any
   };
 
   db.addUser(newUser);
 
-  // Generate JWT Session Token
-  const token = jwt.sign(
-    { userId: newUser.id, email: newUser.email, role: newUser.role, name: newUser.name },
-    JWT_SECRET,
-    { expiresIn: '7d', algorithm: 'HS256' }
-  );
+  const token = req.headers.authorization?.split(' ')[1] || '';
 
   res.status(201).json({
     token,
@@ -217,68 +234,21 @@ routes.post('/auth/register', (req: Request, res: Response): any => {
 });
 
 // POST /api/auth/login
-routes.post('/auth/login', (req: Request, res: Response): any => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required.' });
+routes.post('/auth/login', async (req: Request, res: Response): Promise<any> => {
+  const decoded = await verifyFirebaseIdToken(req);
+  if (!decoded || !decoded.email) {
+    return res.status(401).json({ error: 'Invalid or missing Firebase ID token.' });
   }
 
+  const email = decoded.email.toLowerCase();
   const users = db.getUsers();
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const user = users.find(u => u.email.toLowerCase() === email);
 
-  // Check custom hardcoded fallback users if database is empty or they use default credentials
   if (!user) {
-    const fallbackPasswords: Record<string, string> = {
-      'director@worldcup2026.org': 'password123',
-      'security@worldcup2026.org': 'password123',
-      'volunteer@worldcup2026.org': 'password123',
-      'fan@worldcup2026.org': 'password123'
-    };
-    const fallbackRoles: Record<string, 'Operations' | 'Security' | 'Volunteer' | 'Fan'> = {
-      'director@worldcup2026.org': 'Operations',
-      'security@worldcup2026.org': 'Security',
-      'volunteer@worldcup2026.org': 'Volunteer',
-      'fan@worldcup2026.org': 'Fan'
-    };
-
-    if (fallbackPasswords[email.toLowerCase()] && fallbackPasswords[email.toLowerCase()] === password) {
-      const fallbackUser: User = {
-        id: `user-fallback-${fallbackRoles[email.toLowerCase()]}`,
-        name: `${fallbackRoles[email.toLowerCase()]} Shift Supervisor`,
-        email: email.toLowerCase(),
-        passwordHash: hashPassword(password),
-        role: fallbackRoles[email.toLowerCase()]
-      };
-      
-      const token = jwt.sign(
-        { userId: fallbackUser.id, email: fallbackUser.email, role: fallbackUser.role, name: fallbackUser.name },
-        JWT_SECRET,
-        { expiresIn: '7d', algorithm: 'HS256' }
-      );
-      
-      return res.status(200).json({
-        token,
-        user: {
-          id: fallbackUser.id,
-          name: fallbackUser.name,
-          email: fallbackUser.email,
-          role: fallbackUser.role
-        }
-      });
-    }
-
-    return res.status(401).json({ error: 'Invalid email or password.' });
+    return res.status(404).json({ error: 'User not found. Please register first.' });
   }
 
-  if (!comparePassword(password, user.passwordHash)) {
-    return res.status(401).json({ error: 'Invalid email or password.' });
-  }
-
-  const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role, name: user.name },
-    JWT_SECRET,
-    { expiresIn: '7d', algorithm: 'HS256' }
-  );
+  const token = req.headers.authorization?.split(' ')[1] || '';
 
   res.status(200).json({
     token,
@@ -292,32 +262,31 @@ routes.post('/auth/login', (req: Request, res: Response): any => {
 });
 
 // POST /api/auth/google (Federated Identity Provider)
-routes.post('/auth/google', (req: Request, res: Response): any => {
-  const { email, name, role } = req.body;
-  if (!email || !name) {
-    return res.status(400).json({ error: 'Google email and name are required.' });
+routes.post('/auth/google', async (req: Request, res: Response): Promise<any> => {
+  const decoded = await verifyFirebaseIdToken(req);
+  if (!decoded || !decoded.email) {
+    return res.status(401).json({ error: 'Invalid or missing Firebase ID token.' });
   }
 
+  const role = req.body.role || 'Fan';
+  const email = decoded.email.toLowerCase();
+  const name = decoded.name || decoded.email.split('@')[0];
   const users = db.getUsers();
-  let user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+  let user = users.find(u => u.email.toLowerCase() === email);
 
   if (!user) {
-    // Register as new user via Google
     user = {
-      id: `user-google-${Math.random().toString(36).substr(2, 9)}`,
+      id: `user-firebase-${decoded.uid}`,
       name,
-      email: email.toLowerCase(),
-      passwordHash: hashPassword(Math.random().toString(36)), // random fallback password
-      role: (role || 'Fan') as any
+      email,
+      passwordHash: hashPassword(Math.random().toString(36)),
+      role: role as any
     };
     db.addUser(user);
   }
 
-  const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role, name: user.name },
-    JWT_SECRET,
-    { expiresIn: '7d', algorithm: 'HS256' }
-  );
+  const token = req.headers.authorization?.split(' ')[1] || '';
 
   res.status(200).json({
     token,
@@ -331,19 +300,28 @@ routes.post('/auth/google', (req: Request, res: Response): any => {
 });
 
 // GET /api/auth/me (Protected Profile Check)
-routes.get('/auth/me', (req: Request, res: Response): any => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Unauthorized. Missing token.' });
+routes.get('/auth/me', async (req: Request, res: Response): Promise<any> => {
+  const decoded = await verifyFirebaseIdToken(req);
+  if (!decoded || !decoded.email) {
+    return res.status(401).json({ error: 'Unauthorized. Invalid or missing Firebase ID token.' });
   }
 
-  const token = authHeader.split(' ')[1];
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }) as any;
-    res.status(200).json({ user: decoded });
-  } catch (err) {
-    res.status(401).json({ error: 'Unauthorized. Invalid session token.' });
+  const email = decoded.email.toLowerCase();
+  const users = db.getUsers();
+  const user = users.find(u => u.email.toLowerCase() === email);
+
+  if (user) {
+    return res.status(200).json({ user });
   }
+
+  return res.status(200).json({
+    user: {
+      id: `user-firebase-${decoded.uid}`,
+      name: decoded.name || email.split('@')[0],
+      email,
+      role: 'Fan'
+    }
+  });
 });
 
 export default routes;

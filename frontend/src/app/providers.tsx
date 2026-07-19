@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { API_URL, SOCKET_URL } from '../config';
+import { auth, googleProvider } from '../firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 
 export type UserRole = 'Fan' | 'Operations' | 'Security' | 'Volunteer';
 
@@ -278,7 +280,7 @@ interface AppContextType {
   token: string | null;
   login: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, pass: string, role: UserRole) => Promise<{ success: boolean; error?: string }>;
-  loginWithGoogle: (name: string, email: string, role: UserRole) => Promise<boolean>;
+  loginWithGoogle: (role: UserRole) => Promise<boolean>;
   logout: () => void;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
@@ -323,128 +325,149 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [token, setToken] = useState<string | null>(localStorage.getItem('aegisstadium_token'));
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // On mount, check token
   useEffect(() => {
-    const verifySession = async () => {
-      if (!token) return;
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+      if (!firebaseUser) {
+        setToken(null);
+        setUser(null);
+        setIsConnected(false);
+        setRoleState('Fan');
+        setIsLoading(false);
+        return;
+      }
+
       try {
+        const idToken = await firebaseUser.getIdToken();
+        localStorage.setItem('aegisstadium_token', idToken);
+        setToken(idToken);
+
         const res = await fetch(`${API_URL}/api/auth/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${idToken}` }
         });
+
         if (res.ok) {
           const data = await res.json();
           setUser(data.user);
           setRoleState(data.user.role);
           setIsConnected(true);
         } else {
-          logout();
+          const fallbackName = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Firebase User';
+          setUser({ id: firebaseUser.uid, name: fallbackName, email: firebaseUser.email || '', role: 'Fan' });
+          setRoleState('Fan');
+          setIsConnected(true);
         }
       } catch (err) {
-        console.warn('Auth server offline. Operating in fallback offline mode.');
+        console.warn('Firebase auth session verification failed.', err);
+      } finally {
+        setIsLoading(false);
       }
-    };
-    verifySession();
-  }, [token]);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const login = async (email: string, pass: string) => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pass })
+      const credential = await signInWithEmailAndPassword(auth, email, pass);
+      const idToken = await credential.user.getIdToken();
+      localStorage.setItem('aegisstadium_token', idToken);
+      setToken(idToken);
+
+      const res = await fetch(`${API_URL}/api/auth/me`, {
+        headers: { Authorization: `Bearer ${idToken}` }
       });
+
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('aegisstadium_token', data.token);
-        setToken(data.token);
         setUser(data.user);
         setRoleState(data.user.role);
-        return { success: true };
-      } else {
-        const errData = await res.json();
-        return { success: false, error: errData.error || 'Authentication failed' };
-      }
-    } catch (err) {
-      // Offline fallback login check
-      const fallbackRoles: Record<string, UserRole> = {
-        'director@worldcup2026.org': 'Operations',
-        'security@worldcup2026.org': 'Security',
-        'volunteer@worldcup2026.org': 'Volunteer',
-        'fan@worldcup2026.org': 'Fan'
-      };
-      if (fallbackRoles[email.toLowerCase()] && pass === 'password123') {
-        const dummyUser = {
-          id: 'user-offline',
-          name: `${fallbackRoles[email.toLowerCase()]} Director`,
-          email: email.toLowerCase(),
-          role: fallbackRoles[email.toLowerCase()]
-        };
-        setUser(dummyUser);
-        setRoleState(dummyUser.role);
+        setIsConnected(true);
         return { success: true };
       }
-      return { success: false, error: 'Auth service connection error' };
+
+      return { success: false, error: 'Authentication verification failed.' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Authentication failed' };
     }
   };
 
   const register = async (name: string, email: string, pass: string, newRole: UserRole) => {
     try {
+      const credential = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(credential.user, { displayName: name });
+      const idToken = await credential.user.getIdToken();
+
       const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password: pass, role: newRole })
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ role: newRole })
       });
+
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('aegisstadium_token', data.token);
-        setToken(data.token);
+        localStorage.setItem('aegisstadium_token', idToken);
+        setToken(idToken);
         setUser(data.user);
         setRoleState(data.user.role);
+        setIsConnected(true);
         return { success: true };
-      } else {
-        const errData = await res.json();
-        return { success: false, error: errData.error || 'Registration failed' };
       }
-    } catch (err) {
-      return { success: false, error: 'Registration service connection error' };
+
+      const errData = await res.json();
+      return { success: false, error: errData.error || 'Registration failed' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Registration service connection error' };
     }
   };
 
-  const loginWithGoogle = async (name: string, email: string, newRole: UserRole) => {
+  const loginWithGoogle = async (newRole: UserRole) => {
     try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const firebaseUser = result.user;
+      const idToken = await firebaseUser.getIdToken();
+
       const res = await fetch(`${API_URL}/api/auth/google`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, role: newRole })
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ role: newRole })
       });
+
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('aegisstadium_token', data.token);
-        setToken(data.token);
+        localStorage.setItem('aegisstadium_token', idToken);
+        setToken(idToken);
         setUser(data.user);
         setRoleState(data.user.role);
+        setIsConnected(true);
         return true;
       }
+
+      return false;
     } catch (err) {
-      console.warn('Google auth server offline. Fallback client login.');
+      console.warn('Firebase Google auth failed.', err);
+      return false;
     }
-    const dummyUser = {
-      id: 'user-google-offline',
-      name,
-      email,
-      role: newRole
-    };
-    setUser(dummyUser);
-    setRoleState(newRole);
-    return true;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn('Firebase sign out failed.', err);
+    }
+
     localStorage.removeItem('aegisstadium_token');
     setToken(null);
     setUser(null);
+    setIsConnected(false);
+    setRoleState('Fan');
   };
-
   // State caches
   const [matches, setMatches] = useState<Match[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);

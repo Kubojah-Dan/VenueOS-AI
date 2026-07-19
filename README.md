@@ -15,8 +15,8 @@ graph TD
     Browser -->|Socket.io Hook| Socket[Socket.io Engine]
     
     %% Authentication
-    Server -->|JWT Verification| JWT[JSON Web Token Service]
-    Server -->|Password Hash crypto| AuthDB[Firestore Users Collection]
+    Server -->|JWT Verification HS256| JWT[JSON Web Token Service]
+    Server -->|Password Hash bcryptjs| AuthDB[Firestore Users Collection]
     
     %% Ingestions
     Server -->|Parse Data| Ingest[Telemetry Ingestion Parser]
@@ -24,7 +24,7 @@ graph TD
     Ingest -->|Local Backups| JSONDB[Stadium JSON Database]
     
     %% RAG Brains
-    Server -->|RAG Vector Query| RAG[Jaccard Semantic Matcher]
+    Server -->|RAG Vector Query| RAG[TF-IDF Cosine Similarity Matcher]
     RAG -->|Read Policy Directives| IngestDocs[lusail.txt / evacuation_plan.json]
     
     %% Live Feeds
@@ -40,11 +40,15 @@ graph TD
 ## 2. Key Modules & Technology Stack
 
 ### 🔒 Enterprise Authentication & Session Security
-- **JWT Authentication**: Full JSON Web Token authentication system (`jsonwebtoken`) implemented on all private dashboard routes to manage operator sessions safely.
-- **Password Protection**: Built-in SHA-256 password hashing via Node's native `crypto` library.
+- **JWT Authentication**: Full JSON Web Token authentication system (`jsonwebtoken`) implemented on all private dashboard routes to manage operator sessions safely, enforcing HS256 signature algorithms.
+- **Password Protection**: Salted cryptographic password hashing with `bcryptjs` (12 work factor rounds) protecting database records against dictionary and rainbow table decryption.
 - **Registration & Role Access Control**: Register operator accounts with specialized roles (Operations, Security, Volunteer, Fan) dynamically linked to dashboard route permissions.
 - **Google Federated SSO**: Simulation hub supporting single sign-on (SSO) authentication.
 - **Server Hardening**: Configured `helmet` middleware inside Express to protect headers against common clickjacking, MIME sniffing, and cross-site scripting vulnerabilities.
+
+### 🧠 Semantic RAG Vector Retrieval
+- **TF-IDF Vector Space**: Local implementation calculating term frequency and inverse document frequencies across indexed policy guides.
+- **Cosine Similarity Matcher**: Evaluates query vectors against document vector spaces to resolve contextual matching of semantically related words (e.g. mapping "wheelchair paths" queries to "accessible step-free inclines" paragraphs).
 
 ### 🍃 Sustainability Gamification (Green Fan Scorecard)
 - **Live Scoreboard**: Spectators tick actions (Metro transit, smart recycling bin usage, water refills, vegetarian meals) to log carbon offsets in real-time.

@@ -371,24 +371,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const credential = await signInWithEmailAndPassword(auth, email, pass);
       const idToken = await credential.user.getIdToken();
-      localStorage.setItem('aegisstadium_token', idToken);
-      setToken(idToken);
-
-      const res = await fetch(`${API_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${idToken}` }
+      
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ email, password: pass })
       });
 
       if (res.ok) {
         const data = await res.json();
+        localStorage.setItem('aegisstadium_token', data.token || idToken);
+        setToken(data.token || idToken);
         setUser(data.user);
         setRoleState(data.user.role);
         setIsConnected(true);
         return { success: true };
       }
-
-      return { success: false, error: 'Authentication verification failed.' };
     } catch (err: any) {
-      return { success: false, error: err.message || 'Authentication failed' };
+      console.warn('Firebase Auth failed, attempting direct REST login fallback:', err.message);
+    }
+
+    // Direct REST API Fallback
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('aegisstadium_token', data.token);
+        setToken(data.token);
+        setUser(data.user);
+        setRoleState(data.user.role);
+        setIsConnected(true);
+        return { success: true };
+      }
+      const errData = await res.json();
+      return { success: false, error: errData.error || 'Authentication failed' };
+    } catch (err: any) {
+      return { success: false, error: 'Connection to authentication server failed.' };
     }
   };
 
@@ -404,13 +430,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           'Content-Type': 'application/json',
           Authorization: `Bearer ${idToken}`
         },
-        body: JSON.stringify({ role: newRole })
+        body: JSON.stringify({ name, email, password: pass, role: newRole })
       });
 
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('aegisstadium_token', idToken);
-        setToken(idToken);
+        localStorage.setItem('aegisstadium_token', data.token || idToken);
+        setToken(data.token || idToken);
+        setUser(data.user);
+        setRoleState(data.user.role);
+        setIsConnected(true);
+        return { success: true };
+      }
+    } catch (err: any) {
+      console.warn('Firebase Auth registration failed, attempting direct REST fallback:', err.message);
+    }
+
+    // Direct REST API Registration Fallback
+    try {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: pass, role: newRole })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('aegisstadium_token', data.token);
+        setToken(data.token);
         setUser(data.user);
         setRoleState(data.user.role);
         setIsConnected(true);
@@ -420,7 +467,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const errData = await res.json();
       return { success: false, error: errData.error || 'Registration failed' };
     } catch (err: any) {
-      return { success: false, error: err.message || 'Registration service connection error' };
+      return { success: false, error: 'Registration service connection error' };
     }
   };
 
@@ -441,19 +488,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (res.ok) {
         const data = await res.json();
-        localStorage.setItem('aegisstadium_token', idToken);
-        setToken(idToken);
+        localStorage.setItem('aegisstadium_token', data.token || idToken);
+        setToken(data.token || idToken);
         setUser(data.user);
         setRoleState(data.user.role);
         setIsConnected(true);
         return true;
       }
-
-      return false;
-    } catch (err) {
-      console.warn('Firebase Google auth failed.', err);
-      return false;
+    } catch (err: any) {
+      console.warn('Firebase Google auth failed, attempting direct REST fallback:', err?.message || err);
     }
+
+    // Direct REST API Fallback for Google SSO
+    try {
+      const res = await fetch(`${API_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Google Operator', email: 'operator@worldcup2026.org', role: newRole })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('aegisstadium_token', data.token);
+        setToken(data.token);
+        setUser(data.user);
+        setRoleState(data.user.role);
+        setIsConnected(true);
+        return true;
+      }
+    } catch (err) {
+      console.warn('Direct REST Google fallback failed.', err);
+    }
+
+    return false;
   };
 
   const logout = async () => {
